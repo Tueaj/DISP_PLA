@@ -1,6 +1,8 @@
-﻿namespace EventLibrary;
+﻿using MessageHandling.Abstractions;
 
-public class OrderSucceeded
+namespace EventLibrary;
+
+public class OrderSucceeded : IMessage
 {
     public Guid OrderId;
     

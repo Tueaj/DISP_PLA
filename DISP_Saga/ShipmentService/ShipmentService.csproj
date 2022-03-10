@@ -2,9 +2,17 @@
 
     <PropertyGroup>
         <TargetFramework>net6.0</TargetFramework>
-        <Nullable>enable</Nullable>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     </PropertyGroup>
+    
+    <ItemGroup>
+        <None Include="appsettings.json" />
+        <None Include="appsettings.*.json">
+            <DependentUpon>appsettings.json</DependentUpon>
+        </None>
+    </ItemGroup>
+    
+    <ItemGroup>
+      <ProjectReference Include="..\EventLibrary\EventLibrary.csproj" />
+    </ItemGroup>
 
 </Project>
