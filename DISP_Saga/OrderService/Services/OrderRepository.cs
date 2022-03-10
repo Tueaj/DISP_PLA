@@ -6,12 +6,10 @@ namespace OrderService.Services;
 
 public class OrderRepository : IOrderRepository
 {
-    private readonly ILogger<OrderRepository> _logger;
     private readonly IMongoCollection<Order> _orderCollection;
     
-    public OrderRepository(ILogger<OrderRepository> logger, IOptions<MongoConnectionSettings> settings)
+    public OrderRepository(IOptions<MongoConnectionSettings> settings)
     {
-        _logger = logger;
         var mongoClient = new MongoClient(settings.Value.ConnectionString);
         var mongoDatabase = mongoClient.GetDatabase(settings.Value.DatabaseName);
 
