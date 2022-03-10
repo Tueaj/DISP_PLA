@@ -1,6 +1,8 @@
-﻿namespace EventLibrary;
+﻿using MessageHandling.Abstractions;
 
-public class InventoryReserved
+namespace EventLibrary;
+
+public class InventoryReserved : IMessage
 {
     public Guid OrderId;
 }

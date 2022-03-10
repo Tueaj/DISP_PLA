@@ -1,6 +1,8 @@
-﻿namespace EventLibrary;
+﻿using MessageHandling.Abstractions;
 
-public class CreditReserved
+namespace EventLibrary;
+
+public class CreditReserved : IMessage
 {
     public Guid OrderId;
 }
