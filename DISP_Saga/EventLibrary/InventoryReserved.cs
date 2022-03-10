@@ -4,5 +4,5 @@ namespace EventLibrary;
 
 public class InventoryReserved : IMessage
 {
-    public Guid OrderId;
+    public string OrderId;
 }

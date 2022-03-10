@@ -4,5 +4,5 @@ namespace EventLibrary;
 
 public class CreditReserved : IMessage
 {
-    public Guid OrderId;
+    public string OrderId;
 }

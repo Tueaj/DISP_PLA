@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Options;
+﻿using System.Collections.Generic;
+using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using OrderService.Models;
 
@@ -21,7 +22,7 @@ public class OrderRepository : IOrderRepository
         return _orderCollection.Find(_ => true).ToList();
     }
 
-    public Order? GetOrderByOrderId(Guid orderId)
+    public Order? GetOrderByOrderId(string orderId)
     {
         return _orderCollection.Find(order => order.OrderId == orderId).FirstOrDefault();
     }
@@ -31,8 +32,26 @@ public class OrderRepository : IOrderRepository
         _orderCollection.InsertOne(order);
     }
 
-    public void DeleteOrder(Guid orderId)
+    public void DeleteOrder(string orderId)
     {
         _orderCollection.DeleteOne(order => order.OrderId == orderId);
+    }
+
+    public void CreditReserved(string orderId)
+    {
+        var update = Builders<Order>.Update.Set(order => order.creditReserved, true);
+        _orderCollection.UpdateOneAsync(order => order.OrderId == orderId, update);
+    }
+
+    public void InventoryReserved(string orderId)
+    {
+        var update = Builders<Order>.Update.Set(order => order.inventoryReserved, true);
+        _orderCollection.UpdateOneAsync(order => order.OrderId == orderId, update);
+    }
+
+    public bool OrderComplete(string orderId)
+    {
+        var order = GetOrderByOrderId(orderId);
+        return order.creditReserved && order.inventoryReserved;
     }
 }

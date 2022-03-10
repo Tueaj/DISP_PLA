@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using OrderService.Models;
 using OrderService.Services;
@@ -9,7 +10,7 @@ namespace OrderService.Controllers
     public class OrderController : ControllerBase
     {
         private readonly IOrderRepository _orderRepository;
-        
+
         public OrderController(IOrderRepository orderRepository)
         {
             _orderRepository = orderRepository;
@@ -22,7 +23,7 @@ namespace OrderService.Controllers
         }
 
         [HttpGet("{id}")]
-        public ActionResult<Order> GetOrder(Guid id)
+        public ActionResult<Order> GetOrder(string id)
         {
             var foundOrder = _orderRepository.GetOrderByOrderId(id);
             
@@ -38,17 +39,19 @@ namespace OrderService.Controllers
         public ActionResult<Order> CreateOrder(Order order)
         {
             var foundOrder = _orderRepository.GetOrderByOrderId(order.OrderId);
-
+            order.creditReserved = false;
+            order.inventoryReserved = false;
+            
             if (foundOrder == null)
             {
                 _orderRepository.CreateOrder(order);
             }
             else
             {
-                return BadRequest();
+                return Conflict();
             }
 
-            return Created("Order succesfull", order);
+            return Created("Order created", order);
         }
     }
 }

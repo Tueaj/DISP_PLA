@@ -4,7 +4,7 @@ namespace EventLibrary;
 
 public class OrderSucceeded : IMessage
 {
-    public Guid OrderId;
+    public string OrderId;
     
-    public Dictionary<Guid, int> OrderedItems;
+    public Dictionary<string, int> OrderedItems;
 }
