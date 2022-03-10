@@ -2,9 +2,9 @@
 
 namespace CreditService.Models;
 
-public class Credit
+public class Reservation
 {
-    [BsonId] public string CustomerId;
+    [BsonId] public string OrderId;
 
     public double Amount;
 }

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using CreditService.Models;
 using CreditService.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -9,7 +10,7 @@ namespace CreditService.Controllers
     public class CreditController : ControllerBase
     {
         private readonly ICreditRepository _creditRepository;
-        
+
         public CreditController(ICreditRepository creditRepository)
         {
             _creditRepository = creditRepository;
@@ -25,7 +26,7 @@ namespace CreditService.Controllers
         public ActionResult<Credit> GetCredit(string id)
         {
             Credit? foundCredit = _creditRepository.GetCreditByCustomerId(id);
-            
+
             if (foundCredit == null)
             {
                 return NotFound();
@@ -41,7 +42,7 @@ namespace CreditService.Controllers
 
             if (foundCredit == null)
             {
-                _creditRepository.CreateCredit(new Credit(id, credit));
+                _creditRepository.CreateCredit(new Credit {Amount = credit, CustomerId = id});
             }
             else
             {

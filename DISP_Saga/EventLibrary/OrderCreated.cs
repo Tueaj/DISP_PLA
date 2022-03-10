@@ -4,11 +4,11 @@ namespace EventLibrary;
 
 public class OrderCreated : IMessage
 {
-    public Guid OrderId;
+    public string OrderId;
 
-    public Guid CustomerId;
+    public string CustomerId;
 
     public double Total;
 
-    public Dictionary<Guid, int> OrderedItems;
+    public Dictionary<string, int> OrderedItems;
 }

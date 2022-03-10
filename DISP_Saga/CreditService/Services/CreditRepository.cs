@@ -1,6 +1,7 @@
-﻿using CreditService.Models;
+﻿using System.Collections.Generic;
+using CreditService.Models;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace CreditService.Services;
@@ -9,8 +10,7 @@ public class CreditRepository : ICreditRepository
 {
     private readonly ILogger<CreditRepository> _logger;
     private readonly IMongoCollection<Credit> _creditCollection;
-
-
+    
     public CreditRepository(ILogger<CreditRepository> logger, IOptions<MongoConnectionSettings> settings)
     {
         _logger = logger;
