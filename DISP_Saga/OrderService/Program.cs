@@ -1,5 +1,5 @@
-using CreditService.Models;
 using MessageHandling;
+using OrderService.Models;
 using OrderService.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,8 +11,6 @@ builder.Services.AddOptions<MongoConnectionSettings>()
     {
         configuration.GetSection(MongoConnectionSettings.Key).Bind(options);
     });
-
-// Add services to the container.
 
 builder.Services.AddControllers()
     .AddJsonOptions(configure =>

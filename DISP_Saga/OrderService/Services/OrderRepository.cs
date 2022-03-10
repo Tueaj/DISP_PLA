@@ -1,5 +1,4 @@
-﻿using CreditService.Models;
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using OrderService.Models;
 
@@ -16,7 +15,7 @@ public class OrderRepository : IOrderRepository
         var mongoClient = new MongoClient(settings.Value.ConnectionString);
         var mongoDatabase = mongoClient.GetDatabase(settings.Value.DatabaseName);
 
-        _orderCollection = mongoDatabase.GetCollection<Order>("Credit");
+        _orderCollection = mongoDatabase.GetCollection<Order>("Order");
     }
     
     public IEnumerable<Order> GetAllOrders()

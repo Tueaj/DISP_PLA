@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using OrderService.Models;
 using OrderService.Services;
 
-namespace CreditService.Controllers
+namespace OrderService.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -16,13 +16,13 @@ namespace CreditService.Controllers
         }
 
         [HttpGet]
-        public IEnumerable<Order> GetCredits()
+        public IEnumerable<Order> GetOrder()
         {
             return _orderRepository.GetAllOrders();
         }
 
         [HttpGet("{id}")]
-        public ActionResult<Order> GetCredit(Guid id)
+        public ActionResult<Order> GetOrder(Guid id)
         {
             var foundOrder = _orderRepository.GetOrderByOrderId(id);
             
@@ -35,7 +35,7 @@ namespace CreditService.Controllers
         }
 
         [HttpPost("")]
-        public ActionResult<Order> CreateCredit(Order order)
+        public ActionResult<Order> CreateOrder(Order order)
         {
             var foundOrder = _orderRepository.GetOrderByOrderId(order.OrderId);
 

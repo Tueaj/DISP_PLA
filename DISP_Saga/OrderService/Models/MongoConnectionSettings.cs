@@ -1,4 +1,4 @@
-﻿namespace CreditService.Models;
+﻿namespace OrderService.Models;
 
 public class MongoConnectionSettings
 {
