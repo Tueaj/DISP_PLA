@@ -1,7 +1,10 @@
 using CreditService.Models;
 using CreditService.Services;
+using MessageHandling;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddMessageHandling();
 
 builder.Services.AddOptions<MongoConnectionSettings>()
     .Configure<IConfiguration>((options, configuration) =>
