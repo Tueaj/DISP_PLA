@@ -9,6 +9,10 @@ using OrderService.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddMessageHandling();
+builder.Services.AddMessageHandler<CreditReservedEventHandler>();
+builder.Services.AddMessageHandler<CreditReservationFailedEventHandler>();
+builder.Services.AddMessageHandler<InventoryReservedEventHandler>();
+builder.Services.AddMessageHandler<InventoryReservationFailedEventHandler>();
 
 builder.Services.AddOptions<MongoConnectionSettings>()
     .Configure<IConfiguration>((options, configuration) =>
