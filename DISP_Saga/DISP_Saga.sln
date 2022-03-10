@@ -2,7 +2,7 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrderService", "OrderService\OrderService.csproj", "{A7D2C05E-695B-4DD5-92B2-26C359C6D209}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PaymentService", "PaymentService\PaymentService.csproj", "{D303F7C5-B822-44AC-9F7C-78E90F073CD1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CreditService", "CreditService\CreditService.csproj", "{D303F7C5-B822-44AC-9F7C-78E90F073CD1}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InventoryService", "InventoryService\InventoryService.csproj", "{8E512355-9B29-412F-8D1C-828D57C6C396}"
 EndProject
