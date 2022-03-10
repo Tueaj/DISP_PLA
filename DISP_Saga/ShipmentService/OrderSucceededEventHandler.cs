@@ -5,9 +5,9 @@ namespace ShipmentService;
 
 class OrderSucceededEventHandler : EventHandler<OrderSucceeded>
 {
-    private readonly ILogger _logger;
+    private readonly ILogger<OrderSucceededEventHandler> _logger;
 
-    public OrderSucceededEventHandler(ILogger logger)
+    public OrderSucceededEventHandler(ILogger<OrderSucceededEventHandler> logger)
     {
         _logger = logger;
     }
