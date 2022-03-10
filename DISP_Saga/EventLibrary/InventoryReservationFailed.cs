@@ -2,7 +2,7 @@
 
 namespace EventLibrary;
 
-public class InventoryReservedFailed : IMessage
+public class InventoryReservationFailed : IMessage
 {
     public string OrderId;
 }
