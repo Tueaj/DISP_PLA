@@ -1,6 +1,12 @@
-var builder = WebApplication.CreateBuilder(args);
-var app = builder.Build();
+using MessageHandling;
+using Microsoft.AspNetCore.Builder;
+using ShipmentService;
 
-app.MapGet("/", () => "Hello World!");
+var builder = WebApplication.CreateBuilder(args);
+
+var services = builder.Services;
+services.AddMessageHandling<OrderSucceededEventHandler>();
+
+var app = builder.Build();
 
 app.Run();
