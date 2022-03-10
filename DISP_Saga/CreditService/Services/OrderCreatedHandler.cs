@@ -31,7 +31,7 @@ public class OrderCreatedHandler : EventHandler<OrderCreated>
 
         if (credit == null || credit.Amount < message.Total)
         {
-            // Handle rainy day scenario here
+            _producer.ProduceMessage(new CreditReservationFailed() {OrderId = message.OrderId}, QueueName.Command);
             return;
         }
 
@@ -39,7 +39,12 @@ public class OrderCreatedHandler : EventHandler<OrderCreated>
 
         _creditRepository.UpdateCredit(credit);
 
-        _reservationRepository.CreateReservation(new Reservation {Amount = message.Total, OrderId = message.OrderId});
+        _reservationRepository.CreateReservation(new Reservation
+        {
+            Amount = message.Total,
+            CustomerId = message.CustomerId,
+            OrderId = message.OrderId
+        });
 
         _producer.ProduceMessage(new CreditReserved {OrderId = message.OrderId}, QueueName.Command);
     }

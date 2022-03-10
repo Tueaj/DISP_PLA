@@ -11,6 +11,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddMessageHandling();
 builder.Services.AddMessageHandler<OrderCreatedHandler>();
 builder.Services.AddMessageHandler<OrderSucceededHandler>();
+builder.Services.AddMessageHandler<OrderFailedHandler>();
 
 builder.Services.AddOptions<MongoConnectionSettings>()
     .Configure<IConfiguration>((options, configuration) =>
