@@ -5,7 +5,8 @@ using ShipmentService;
 var builder = WebApplication.CreateBuilder(args);
 
 var services = builder.Services;
-services.AddMessageHandling<OrderSucceededEventHandler>();
+services.AddMessageHandler<OrderSucceededEventHandler>();
+services.AddMessageHandling();
 
 var app = builder.Build();
 
