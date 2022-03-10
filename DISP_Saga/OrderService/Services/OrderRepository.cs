@@ -1,0 +1,41 @@
+﻿using CreditService.Models;
+using Microsoft.Extensions.Options;
+using MongoDB.Driver;
+using OrderService.Models;
+
+namespace OrderService.Services;
+
+public class OrderRepository : IOrderRepository
+{
+    private readonly ILogger<OrderRepository> _logger;
+    private readonly IMongoCollection<Order> _orderCollection;
+    
+    public OrderRepository(ILogger<OrderRepository> logger, IOptions<MongoConnectionSettings> settings)
+    {
+        _logger = logger;
+        var mongoClient = new MongoClient(settings.Value.ConnectionString);
+        var mongoDatabase = mongoClient.GetDatabase(settings.Value.DatabaseName);
+
+        _orderCollection = mongoDatabase.GetCollection<Order>("Credit");
+    }
+    
+    public IEnumerable<Order> GetAllOrders()
+    {
+        return _orderCollection.Find(_ => true).ToList();
+    }
+
+    public Order? GetOrderByOrderId(Guid orderId)
+    {
+        return _orderCollection.Find(order => order.OrderId == orderId).FirstOrDefault();
+    }
+
+    public void CreateOrder(Order order)
+    {
+        _orderCollection.InsertOne(order);
+    }
+
+    public void DeleteOrder(Guid orderId)
+    {
+        _orderCollection.DeleteOne(order => order.OrderId == orderId);
+    }
+}
