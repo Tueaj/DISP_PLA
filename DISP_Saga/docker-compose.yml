@@ -1,0 +1,42 @@
+version: "3.9"
+services:
+  creditservice:
+    build:
+      context: .
+      dockerfile: ./CreditService/Dockerfile
+    environment:
+      MessageHandling_HostName: rabbit
+
+  inventoryservice:
+    build:
+      context: .
+      dockerfile: ./InventoryService/Dockerfile
+    environment:
+      MessageHandling_HostName: rabbit
+
+  orderservice:
+    build:
+      context: .
+      dockerfile: ./OrderService/Dockerfile
+    environment:
+      MessageHandling_HostName: rabbit
+
+  shipmentservice:
+    build:
+      context: .
+      dockerfile: ./ShipmentService/Dockerfile
+    environment:
+      MessageHandling_HostName: rabbit
+
+  rabbit:
+    image: rabbitmq:management
+    expose:
+      - "5672"
+    ports:
+      - "15672:15672"
+  mongo:
+    image: mongo
+    expose:
+      - "27017"
+    ports:
+      - "27017:27017"
