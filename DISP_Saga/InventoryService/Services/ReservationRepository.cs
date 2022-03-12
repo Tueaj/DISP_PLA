@@ -14,7 +14,7 @@ public class ReservationRepository : IReservationRepository
     public ReservationRepository(ILogger<ReservationRepository> logger, IOptions<MongoConnectionSettings> settings)
     {
         _logger = logger;
-        var mongoClient = new MongoClient(settings.Value.ConnectionString);
+        var mongoClient = new MongoClient($"mongodb://{settings.Value.HostName}:{settings.Value.Port}");
         var mongoDatabase = mongoClient.GetDatabase(settings.Value.DatabaseName);
 
         _reservationCollection = mongoDatabase.GetCollection<Reservation>("Reservation");

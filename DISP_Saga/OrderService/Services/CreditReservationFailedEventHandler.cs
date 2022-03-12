@@ -1,5 +1,6 @@
 ﻿using EventLibrary;
 using MessageHandling.Abstractions;
+using OrderService.Models;
 
 namespace OrderService.Services;
 
@@ -18,6 +19,13 @@ public class CreditReservationFailedEventHandler: EventHandler<CreditReservation
 
     public override void Handle(CreditReservationFailed message)
     {
+        Order? order = _orderRepository.GetOrderByOrderId(message.OrderId);
+
+        if (order == default)
+        {
+            return;
+        }
+        
         var orderFailedEvent = new OrderFailed {OrderId = message.OrderId};
         _messageProducer.ProduceMessage(orderFailedEvent, "COMMAND");
         _orderRepository.DeleteOrder(message.OrderId);

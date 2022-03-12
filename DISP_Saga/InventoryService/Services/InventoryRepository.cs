@@ -14,7 +14,7 @@ public class InventoryRepository : IInventoryRepository
     public InventoryRepository(ILogger<InventoryRepository> logger, IOptions<MongoConnectionSettings> settings)
     {
         _logger = logger;
-        var mongoClient = new MongoClient(settings.Value.ConnectionString);
+        var mongoClient = new MongoClient($"mongodb://{settings.Value.HostName}:{settings.Value.Port}");
         var mongoDatabase = mongoClient.GetDatabase(settings.Value.DatabaseName);
 
         _creditCollection = mongoDatabase.GetCollection<Item>("Item");

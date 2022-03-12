@@ -1,4 +1,7 @@
 using System.Collections.Generic;
+using EventLibrary;
+using MessageHandling;
+using MessageHandling.Abstractions;
 using Microsoft.AspNetCore.Mvc;
 using OrderService.Models;
 using OrderService.Services;
@@ -10,10 +13,12 @@ namespace OrderService.Controllers
     public class OrderController : ControllerBase
     {
         private readonly IOrderRepository _orderRepository;
+        private readonly IMessageProducer _messageProducer;
 
-        public OrderController(IOrderRepository orderRepository)
+        public OrderController(IOrderRepository orderRepository, IMessageProducer messageProducer)
         {
             _orderRepository = orderRepository;
+            _messageProducer = messageProducer;
         }
 
         [HttpGet]
@@ -51,6 +56,14 @@ namespace OrderService.Controllers
                 return Conflict();
             }
 
+            _messageProducer.ProduceMessage(new OrderCreated
+            {
+                OrderId = order.OrderId,
+                CustomerId = order.CustomerId,
+                Total =  order.Total,
+                OrderedItems = order.OrderedItems
+            }, QueueName.Command);
+            
             return Created("Order created", order);
         }
     }

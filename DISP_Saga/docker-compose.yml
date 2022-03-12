@@ -5,28 +5,39 @@ services:
       context: .
       dockerfile: ./CreditService/Dockerfile
     environment:
-      MessageHandling_HostName: rabbit
+      MessageHandling__HostName: rabbit
+      MongoConnection__HostName: mongo
+    ports:
+      - "8001:80"
 
   inventoryservice:
     build:
       context: .
       dockerfile: ./InventoryService/Dockerfile
     environment:
-      MessageHandling_HostName: rabbit
+      MessageHandling__HostName: rabbit
+      MongoConnection__HostName: mongo
+    ports:
+      - "8002:80"
 
   orderservice:
     build:
       context: .
       dockerfile: ./OrderService/Dockerfile
     environment:
-      MessageHandling_HostName: rabbit
+      MessageHandling__HostName: rabbit
+      MongoConnection__HostName: mongo
+    ports:
+      - "8003:80"
 
   shipmentservice:
     build:
       context: .
       dockerfile: ./ShipmentService/Dockerfile
     environment:
-      MessageHandling_HostName: rabbit
+      MessageHandling__HostName: rabbit
+    ports:
+      - "8004:80"
 
   rabbit:
     image: rabbitmq:management

@@ -14,7 +14,7 @@ public class CreditRepository : ICreditRepository
     public CreditRepository(ILogger<CreditRepository> logger, IOptions<MongoConnectionSettings> settings)
     {
         _logger = logger;
-        var mongoClient = new MongoClient(settings.Value.ConnectionString);
+        var mongoClient = new MongoClient($"mongodb://{settings.Value.HostName}:{settings.Value.Port}");
         var mongoDatabase = mongoClient.GetDatabase(settings.Value.DatabaseName);
 
         _creditCollection = mongoDatabase.GetCollection<Credit>("Credit");
