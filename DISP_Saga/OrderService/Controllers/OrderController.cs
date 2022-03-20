@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using EventLibrary;
 using MessageHandling;
@@ -12,59 +13,57 @@ namespace OrderService.Controllers
     [ApiController]
     public class OrderController : ControllerBase
     {
-        private readonly IOrderRepository _orderRepository;
-        private readonly IMessageProducer _messageProducer;
+        private readonly IOrderLogic _orderLogic;
 
-        public OrderController(IOrderRepository orderRepository, IMessageProducer messageProducer)
+        public OrderController(IOrderLogic orderLogic)
         {
-            _orderRepository = orderRepository;
-            _messageProducer = messageProducer;
+            _orderLogic = orderLogic;
         }
 
         [HttpGet]
-        public IEnumerable<Order> GetOrder()
+        public ActionResult<IEnumerable<Order>> GetOrder()
         {
-            return _orderRepository.GetAllOrders();
+            try
+            {
+                return _orderLogic.GetAllOrders();
+            }
+            catch (Exception exception)
+            {
+                //Log error
+                Console.WriteLine(exception.Message);
+                throw;
+            }
         }
 
         [HttpGet("{id}")]
         public ActionResult<Order> GetOrder(string id)
         {
-            var foundOrder = _orderRepository.GetOrderByOrderId(id);
-            
-            if (foundOrder == null)
+            try
             {
-                return NotFound();
+                return _orderLogic.GetOrderById(id);
             }
-
-            return Ok(foundOrder);
+            catch (Exception exception)
+            {
+                //Log error
+                Console.WriteLine(exception.Message);
+                throw;
+            }
+           
         }
 
         [HttpPost("")]
         public ActionResult<Order> CreateOrder(Order order)
         {
-            var foundOrder = _orderRepository.GetOrderByOrderId(order.OrderId);
-            order.creditReserved = false;
-            order.inventoryReserved = false;
-            
-            if (foundOrder == null)
+            try
             {
-                _orderRepository.CreateOrder(order);
+                return _orderLogic.CreateOrder(order);
             }
-            else
+            catch (Exception exception)
             {
-                return Conflict();
+                //Log error
+                Console.WriteLine(exception.Message);
+                throw;
             }
-
-            _messageProducer.ProduceMessage(new OrderCreated
-            {
-                OrderId = order.OrderId,
-                CustomerId = order.CustomerId,
-                Total =  order.Total,
-                OrderedItems = order.OrderedItems
-            }, QueueName.Command);
-            
-            return Created("Order created", order);
         }
     }
 }
