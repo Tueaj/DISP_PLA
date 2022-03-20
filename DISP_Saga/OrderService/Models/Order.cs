@@ -12,13 +12,4 @@ public class Order
     public double Total;
     public bool creditReserved;
     public bool inventoryReserved;
-    public OrderState orderState;
-}
-
-public enum OrderState
-{
-    PENDING,
-    READY,
-    FAILED,
-    SHIPPED
 }

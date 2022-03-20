@@ -32,6 +32,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSingleton<ICreditRepository, CreditRepository>();
 builder.Services.AddSingleton<IReservationRepository, ReservationRepository>();
+builder.Services.AddScoped<ICreditLogic, CreditLogic>();
 
 var app = builder.Build();
 

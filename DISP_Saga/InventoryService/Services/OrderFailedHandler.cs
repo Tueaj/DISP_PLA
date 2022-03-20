@@ -1,48 +1,36 @@
 ﻿using EventLibrary;
 using InventoryService.Models;
+using MessageHandling;
+using MessageHandling.Abstractions;
 using Microsoft.Extensions.Logging;
 using MongoDB.Bson;
+using System;
 
 namespace InventoryService.Services;
 
-public class OrderFailedHandler : EventHandler<OrderFailed>
+public class OrderFailedHandler : EventLibrary.EventHandler<OrderFailed>
 {
     private readonly ILogger<OrderFailedHandler> _logger;
-    private readonly IReservationRepository _reservationRepository;
-    private readonly IInventoryRepository _inventoryRepository;
+    private readonly IMessageProducer _producer;
+    private readonly IInventoryLogic _inventoryLogic;
 
-    public OrderFailedHandler(ILogger<OrderFailedHandler> logger, IReservationRepository reservationRepository, IInventoryRepository inventoryRepository)
+    public OrderFailedHandler(ILogger<OrderFailedHandler> logger, IMessageProducer producer,
+        IInventoryLogic inventoryLogic)
     {
         _logger = logger;
-        _reservationRepository = reservationRepository;
-        _inventoryRepository = inventoryRepository;
+        _producer = producer;
+        _inventoryLogic = inventoryLogic;
     }
 
     public override void Handle(OrderFailed message)
     {
-        _logger.LogInformation(message.ToJson());
-
-        Reservation? reservation = _reservationRepository.GetReservation(message.OrderId);
-
-        if (reservation == null)
+        try
         {
-            return;
+            _inventoryLogic.OrderFailed(message);
         }
-
-        foreach (var reservedItem in reservation.ItemReservations)
+        catch (Exception exception)
         {
-            Item? item = _inventoryRepository.GetItemByName(reservedItem.Name);
-
-            if (item == default)
-            {
-                continue;
-            }
-
-            item.Amount += reservedItem.Amount;
-            
-            _inventoryRepository.UpdateItem(item);
+            _logger.LogError("InventoryService OrderFailedHandler - failed with exception: " + exception);
         }
-        
-        _reservationRepository.DeleteReservation(reservation.OrderId);
     }
 }

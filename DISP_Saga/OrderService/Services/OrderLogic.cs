@@ -46,7 +46,6 @@ namespace OrderService.Services
             {
                 order.creditReserved = false;
                 order.inventoryReserved = false;
-                order.orderState = OrderState.PENDING;
                 _orderRepository.CreateOrder(order);
             }
             else

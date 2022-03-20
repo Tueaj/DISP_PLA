@@ -4,48 +4,34 @@ using MessageHandling;
 using MessageHandling.Abstractions;
 using Microsoft.Extensions.Logging;
 using MongoDB.Bson;
+using System;
 
 namespace CreditService.Services;
 
-public class OrderCreatedHandler : EventHandler<OrderCreated>
+public class OrderCreatedHandler : EventLibrary.EventHandler<OrderCreated>
 {
     private readonly ILogger<OrderCreatedHandler> _logger;
     private readonly IMessageProducer _producer;
-    private readonly ICreditRepository _creditRepository;
-    private readonly IReservationRepository _reservationRepository;
+    private readonly ICreditLogic _creditLogic;
 
     public OrderCreatedHandler(ILogger<OrderCreatedHandler> logger, IMessageProducer producer,
-        ICreditRepository creditRepository, IReservationRepository reservationRepository)
+        ICreditLogic creditLogic)
     {
         _logger = logger;
         _producer = producer;
-        _creditRepository = creditRepository;
-        _reservationRepository = reservationRepository;
+        _creditLogic = creditLogic;
     }
 
     public override void Handle(OrderCreated message)
     {
-        _logger.LogInformation(message.ToJson());
-
-        Credit? credit = _creditRepository.GetCreditByCustomerId(message.CustomerId);
-
-        if (credit == null || credit.Amount < message.Total)
+        try
         {
-            _producer.ProduceMessage(new CreditReservationFailed() {OrderId = message.OrderId}, QueueName.Command);
-            return;
+            _creditLogic.OrderCreated(message);
         }
-
-        credit.Amount -= message.Total;
-
-        _creditRepository.UpdateCredit(credit);
-
-        _reservationRepository.CreateReservation(new Reservation
+        catch (Exception exception)
         {
-            Amount = message.Total,
-            CustomerId = message.CustomerId,
-            OrderId = message.OrderId
-        });
-
-        _producer.ProduceMessage(new CreditReserved {OrderId = message.OrderId}, QueueName.Command);
+            _logger.LogError("CreditService OrderCreatedHandler - failed with exception: " + exception);
+            _producer.ProduceMessage(new CreditReservationFailed() { OrderId = message.OrderId }, QueueName.Command);
+        }
     }
 }
