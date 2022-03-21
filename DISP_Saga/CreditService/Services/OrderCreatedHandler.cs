@@ -1,9 +1,7 @@
-﻿using CreditService.Models;
-using EventLibrary;
+﻿using EventLibrary;
 using MessageHandling;
 using MessageHandling.Abstractions;
 using Microsoft.Extensions.Logging;
-using MongoDB.Bson;
 using System;
 
 namespace CreditService.Services;
@@ -27,9 +25,11 @@ public class OrderCreatedHandler : EventLibrary.EventHandler<OrderCreated>
         try
         {
             _creditLogic.OrderCreated(message);
+            _producer.ProduceMessage(new CreditReserved { OrderId = message.OrderId }, QueueName.Command);
         }
         catch (Exception exception)
         {
+            //Should check whether exception is custom exception, so it can log something other than error etc.
             _logger.LogError("CreditService OrderCreatedHandler - failed with exception: " + exception);
             _producer.ProduceMessage(new CreditReservationFailed() { OrderId = message.OrderId }, QueueName.Command);
         }

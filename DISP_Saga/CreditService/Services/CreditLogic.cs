@@ -1,7 +1,5 @@
 ﻿using CreditService.Models;
 using EventLibrary;
-using MessageHandling;
-using MessageHandling.Abstractions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MongoDB.Bson;
@@ -13,18 +11,15 @@ namespace CreditService.Services
     public class CreditLogic : ICreditLogic
     {
         private readonly ILogger<CreditLogic> _logger;
-        private readonly IMessageProducer _producer;
         private readonly ICreditRepository _creditRepository;
         private readonly IReservationRepository _reservationRepository;
         private readonly MongoClient _mongoClient;
 
 
-        public CreditLogic(ILogger<CreditLogic> logger, IMessageProducer producer,
-            ICreditRepository creditRepository, IReservationRepository reservationRepository, 
+        public CreditLogic(ILogger<CreditLogic> logger, ICreditRepository creditRepository, IReservationRepository reservationRepository, 
             IOptions<MongoConnectionSettings> settings)
         {
             _logger = logger;
-            _producer = producer;
             _creditRepository = creditRepository;
             _reservationRepository = reservationRepository;
             _mongoClient = new MongoClient($"mongodb://{settings.Value.HostName}:{settings.Value.Port}");
@@ -38,8 +33,8 @@ namespace CreditService.Services
 
             if (credit == null || credit.Amount < message.Total)
             {
-                _producer.ProduceMessage(new CreditReservationFailed() { OrderId = message.OrderId }, QueueName.Command);
-                return;
+                //Should throw custom exception that can be checked for in handlers catch clause
+                throw new Exception("Not enough credit");
             }
 
             credit.Amount -= message.Total;
@@ -67,8 +62,6 @@ namespace CreditService.Services
                     throw;
                 }
             }
-
-            _producer.ProduceMessage(new CreditReserved { OrderId = message.OrderId }, QueueName.Command);
         }
 
         public void OrderFailed(OrderFailed message)

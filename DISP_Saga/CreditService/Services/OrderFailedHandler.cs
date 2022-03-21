@@ -1,9 +1,6 @@
-﻿using CreditService.Models;
-using EventLibrary;
-using MessageHandling;
+﻿using EventLibrary;
 using MessageHandling.Abstractions;
 using Microsoft.Extensions.Logging;
-using MongoDB.Bson;
 using System;
 
 namespace CreditService.Services;
@@ -11,14 +8,11 @@ namespace CreditService.Services;
 public class OrderFailedHandler : EventLibrary.EventHandler<OrderFailed>
 {
     private readonly ILogger<OrderFailedHandler> _logger;
-    private readonly IMessageProducer _producer;
     private readonly ICreditLogic _creditLogic;
 
-    public OrderFailedHandler(ILogger<OrderFailedHandler> logger, IMessageProducer producer,
-        ICreditLogic creditLogic)
+    public OrderFailedHandler(ILogger<OrderFailedHandler> logger, ICreditLogic creditLogic)
     {
         _logger = logger;
-        _producer = producer;
         _creditLogic = creditLogic;
     }
 
@@ -31,6 +25,8 @@ public class OrderFailedHandler : EventLibrary.EventHandler<OrderFailed>
         catch (Exception exception)
         {
             _logger.LogError("CreditService OrderFailedHandler - failed with exception: " + exception);
+            //Throw back to RabbitMQ for retry
+            throw;
         }
     }
 }

@@ -25,9 +25,11 @@ public class OrderCreatedHandler : EventLibrary.EventHandler<OrderCreated>
         try
         {
             _inventoryLogic.OrderCreated(message);
+            _producer.ProduceMessage(new InventoryReserved { OrderId = message.OrderId }, QueueName.Command);
         }
         catch (Exception exception)
         {
+            //Should check whether exception is custom exception, so it can log something other than error etc.
             _logger.LogError("InventoryService OrderCreatedHandler - failed with exception: " + exception);
             _producer.ProduceMessage(new InventoryReservationFailed() { OrderId = message.OrderId }, QueueName.Command);
         }

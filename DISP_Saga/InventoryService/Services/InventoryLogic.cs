@@ -13,18 +13,15 @@ namespace InventoryService.Services
     public class InventoryLogic : IInventoryLogic
     {
         private readonly ILogger<InventoryLogic> _logger;
-        private readonly IMessageProducer _producer;
         private readonly IInventoryRepository _inventoryRepository;
         private readonly IReservationRepository _reservationRepository;
         private readonly MongoClient _mongoClient;
 
 
-        public InventoryLogic(ILogger<InventoryLogic> logger, IMessageProducer producer,
-            IInventoryRepository inventoryRepository, IReservationRepository reservationRepository,
+        public InventoryLogic(ILogger<InventoryLogic> logger, IInventoryRepository inventoryRepository, IReservationRepository reservationRepository,
             IOptions<MongoConnectionSettings> settings)
         {
             _logger = logger;
-            _producer = producer;
             _inventoryRepository = inventoryRepository;
             _reservationRepository = reservationRepository;
             _mongoClient = new MongoClient($"mongodb://{settings.Value.HostName}:{settings.Value.Port}");
@@ -39,8 +36,8 @@ namespace InventoryService.Services
 
                 if (foundItem == default || foundItem.Amount < entry.Value)
                 {
-                    _producer.ProduceMessage(new InventoryReservationFailed { OrderId = message.OrderId }, QueueName.Command);
-                    return;
+                    //Should throw custom exception that can be checked for in handlers catch clause
+                    throw new Exception("Not enough items");
                 }
             }
 
@@ -72,8 +69,6 @@ namespace InventoryService.Services
                     throw;
                 }
             }
-
-            _producer.ProduceMessage(new InventoryReserved { OrderId = message.OrderId }, QueueName.Command);
         }
 
         public void OrderFailed(OrderFailed message)
@@ -116,5 +111,6 @@ namespace InventoryService.Services
                     throw;
                 }
             }
+        }
     }
 }

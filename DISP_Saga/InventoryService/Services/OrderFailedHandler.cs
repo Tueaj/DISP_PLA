@@ -11,14 +11,11 @@ namespace InventoryService.Services;
 public class OrderFailedHandler : EventLibrary.EventHandler<OrderFailed>
 {
     private readonly ILogger<OrderFailedHandler> _logger;
-    private readonly IMessageProducer _producer;
     private readonly IInventoryLogic _inventoryLogic;
 
-    public OrderFailedHandler(ILogger<OrderFailedHandler> logger, IMessageProducer producer,
-        IInventoryLogic inventoryLogic)
+    public OrderFailedHandler(ILogger<OrderFailedHandler> logger, IInventoryLogic inventoryLogic)
     {
         _logger = logger;
-        _producer = producer;
         _inventoryLogic = inventoryLogic;
     }
 
@@ -31,6 +28,8 @@ public class OrderFailedHandler : EventLibrary.EventHandler<OrderFailed>
         catch (Exception exception)
         {
             _logger.LogError("InventoryService OrderFailedHandler - failed with exception: " + exception);
+            //Throw back to RabbitMQ for retry
+            throw;
         }
     }
 }
