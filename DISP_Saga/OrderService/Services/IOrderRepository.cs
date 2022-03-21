@@ -11,5 +11,6 @@ public interface IOrderRepository
     void DeleteOrder(string order);
     void CreditReserved(string orderId);
     void InventoryReserved(string orderId);
-    bool OrderComplete(string orderId);
+    bool CheckOrderComplete(string orderId);
+    bool CheckOrderFailed(string orderId);
 }

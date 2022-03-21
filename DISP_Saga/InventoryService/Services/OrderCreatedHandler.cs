@@ -1,57 +1,35 @@
 ﻿using EventLibrary;
-using InventoryService.Models;
 using MessageHandling;
 using MessageHandling.Abstractions;
 using Microsoft.Extensions.Logging;
-using MongoDB.Bson;
+using System;
 
 namespace InventoryService.Services;
 
-public class OrderCreatedHandler : EventHandler<OrderCreated>
+public class OrderCreatedHandler : EventLibrary.EventHandler<OrderCreated>
 {
     private readonly ILogger<OrderCreatedHandler> _logger;
     private readonly IMessageProducer _producer;
-    private readonly IInventoryRepository _inventoryRepository;
-    private readonly IReservationRepository _reservationRepository;
+    private readonly IInventoryLogic _inventoryLogic;
 
     public OrderCreatedHandler(ILogger<OrderCreatedHandler> logger, IMessageProducer producer,
-        IInventoryRepository inventoryRepository, IReservationRepository reservationRepository)
+        IInventoryLogic inventoryLogic)
     {
         _logger = logger;
         _producer = producer;
-        _inventoryRepository = inventoryRepository;
-        _reservationRepository = reservationRepository;
+        _inventoryLogic = inventoryLogic;
     }
 
     public override void Handle(OrderCreated message)
     {
-        _logger.LogInformation(message.ToJson());
-
-        foreach (var entry in message.OrderedItems)
+        try
         {
-            var foundItem = _inventoryRepository.GetItemByName(entry.Key);
-
-            if (foundItem == default || foundItem.Amount < entry.Value)
-            {
-                _producer.ProduceMessage(new InventoryReservationFailed {OrderId = message.OrderId}, QueueName.Command);
-                return;
-            }
+            _inventoryLogic.OrderCreated(message);
         }
-
-        Reservation reservation = new(){ OrderId = message.OrderId};
-
-        foreach (var entry in message.OrderedItems)
+        catch (Exception exception)
         {
-            var foundItem = _inventoryRepository.GetItemByName(entry.Key);
-
-            foundItem.Amount -= entry.Value;
-            
-            _inventoryRepository.UpdateItem(foundItem);
-            reservation.ItemReservations.Add(foundItem);
+            _logger.LogError("InventoryService OrderCreatedHandler - failed with exception: " + exception);
+            _producer.ProduceMessage(new InventoryReservationFailed() { OrderId = message.OrderId }, QueueName.Command);
         }
-
-        _reservationRepository.CreateReservation(reservation);
-
-        _producer.ProduceMessage(new InventoryReserved {OrderId = message.OrderId}, QueueName.Command);
     }
 }

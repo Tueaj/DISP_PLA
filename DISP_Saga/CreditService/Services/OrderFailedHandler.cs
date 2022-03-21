@@ -1,42 +1,36 @@
 ﻿using CreditService.Models;
 using EventLibrary;
+using MessageHandling;
+using MessageHandling.Abstractions;
 using Microsoft.Extensions.Logging;
 using MongoDB.Bson;
+using System;
 
 namespace CreditService.Services;
 
-public class OrderFailedHandler : EventHandler<OrderFailed>
+public class OrderFailedHandler : EventLibrary.EventHandler<OrderFailed>
 {
     private readonly ILogger<OrderFailedHandler> _logger;
-    private readonly IReservationRepository _reservationRepository;
-    private readonly ICreditRepository _creditRepository;
+    private readonly IMessageProducer _producer;
+    private readonly ICreditLogic _creditLogic;
 
-    public OrderFailedHandler(ILogger<OrderFailedHandler> logger, IReservationRepository reservationRepository, ICreditRepository creditRepository)
+    public OrderFailedHandler(ILogger<OrderFailedHandler> logger, IMessageProducer producer,
+        ICreditLogic creditLogic)
     {
         _logger = logger;
-        _reservationRepository = reservationRepository;
-        _creditRepository = creditRepository;
+        _producer = producer;
+        _creditLogic = creditLogic;
     }
 
     public override void Handle(OrderFailed message)
     {
-        _logger.LogInformation(message.ToJson());
-
-        Reservation? reservation = _reservationRepository.GetReservation(message.OrderId);
-
-        if (reservation == null)
+        try
         {
-            return;
+            _creditLogic.OrderFailed(message);
         }
-
-        Credit? credit = _creditRepository.GetCreditByCustomerId(reservation.CustomerId);
-
-        if (credit != null)
+        catch (Exception exception)
         {
-            credit.Amount += reservation.Amount;
-            _creditRepository.UpdateCredit(credit);
+            _logger.LogError("CreditService OrderFailedHandler - failed with exception: " + exception);
         }
-        
-        _reservationRepository.DeleteReservation(reservation.OrderId);
     }
 }

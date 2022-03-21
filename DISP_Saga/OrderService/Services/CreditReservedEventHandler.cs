@@ -19,8 +19,14 @@ public class CreditReservedEventHandler: EventHandler<CreditReserved>
 
     public override void Handle(CreditReserved message)
     {
+        if(_orderRepository.CheckOrderFailed(message.OrderId))
+        {
+            var orderFailedEvent = new OrderFailed { OrderId = message.OrderId };
+            _messageProducer.ProduceMessage(orderFailedEvent, "COMMAND");
+        }
+
         _orderRepository.CreditReserved(message.OrderId);
-        if (!_orderRepository.OrderComplete(message.OrderId))
+        if (!_orderRepository.CheckOrderComplete(message.OrderId))
         {
             return;
         }

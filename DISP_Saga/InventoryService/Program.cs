@@ -32,6 +32,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSingleton<IInventoryRepository, InventoryRepository>();
 builder.Services.AddSingleton<IReservationRepository, ReservationRepository>();
+builder.Services.AddScoped<IInventoryLogic, InventoryLogic>();
 
 var app = builder.Build();
 

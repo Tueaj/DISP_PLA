@@ -40,19 +40,24 @@ public class OrderRepository : IOrderRepository
 
     public void CreditReserved(string orderId)
     {
-        var update = Builders<Order>.Update.Set(order => order.creditReserved, true);
+        var update = Builders<Order>.Update.Set(order => order.orderState, OrderState.CREDIT_RESERVED);
         _orderCollection.UpdateOneAsync(order => order.OrderId == orderId, update);
     }
 
     public void InventoryReserved(string orderId)
     {
-        var update = Builders<Order>.Update.Set(order => order.inventoryReserved, true);
+        var update = Builders<Order>.Update.Set(order => order.orderState, OrderState.INVENTORY_RESERVED);
         _orderCollection.UpdateOneAsync(order => order.OrderId == orderId, update);
     }
 
-    public bool OrderComplete(string orderId)
+    public bool CheckOrderComplete(string orderId)
     {
         var order = GetOrderByOrderId(orderId);
-        return order is {creditReserved: true, inventoryReserved: true};
+        return order is { orderState: OrderState.COMPLETE };
     }
-}
+
+    public bool CheckOrderFailed(string orderId)
+    {
+        var order = GetOrderByOrderId(orderId);
+        return order is { orderState: OrderState.FAILED };
+    }
