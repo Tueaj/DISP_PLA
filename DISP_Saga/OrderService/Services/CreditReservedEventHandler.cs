@@ -23,7 +23,6 @@ public class CreditReservedEventHandler: EventHandler<CreditReserved>
         {
             var orderFailedEvent = new OrderFailed { OrderId = message.OrderId };
             _messageProducer.ProduceMessage(orderFailedEvent, "COMMAND");
-            _orderRepository.DeleteOrder(message.OrderId);
         }
 
         _orderRepository.CreditReserved(message.OrderId);

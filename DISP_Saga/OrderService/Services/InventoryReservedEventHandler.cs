@@ -23,7 +23,6 @@ public class InventoryReservedEventHandler: EventHandler<InventoryReserved>
         {
             var orderFailedEvent = new OrderFailed { OrderId = message.OrderId };
             _messageProducer.ProduceMessage(orderFailedEvent, "COMMAND");
-            _orderRepository.DeleteOrder(message.OrderId);
         }
 
         _orderRepository.InventoryReserved(message.OrderId);
