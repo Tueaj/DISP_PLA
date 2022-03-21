@@ -10,6 +10,14 @@ public class Order
     public string CustomerId;
     public Dictionary<string, int> OrderedItems;
     public double Total;
-    public bool creditReserved;
-    public bool inventoryReserved;
+    public OrderState orderState;
+}
+
+public enum OrderState
+{
+    PENDING,
+    CREDIT_RESERVED,
+    INVENTORY_RESERVED,
+    FAILED,
+    COMPLETE
 }
