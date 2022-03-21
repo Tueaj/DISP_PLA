@@ -9,7 +9,7 @@ namespace OrderService.Services;
 public class OrderRepository : IOrderRepository
 {
     private readonly IMongoCollection<Order> _orderCollection;
-    
+
     public OrderRepository(IOptions<MongoConnectionSettings> settings)
     {
         var mongoClient = new MongoClient($"mongodb://{settings.Value.HostName}:{settings.Value.Port}");
@@ -17,7 +17,7 @@ public class OrderRepository : IOrderRepository
 
         _orderCollection = mongoDatabase.GetCollection<Order>("Order");
     }
-    
+
     public IEnumerable<Order> GetAllOrders()
     {
         return _orderCollection.Find(_ => true).ToList();
@@ -61,3 +61,4 @@ public class OrderRepository : IOrderRepository
         var order = GetOrderByOrderId(orderId);
         return order is { orderState: OrderState.FAILED };
     }
+}
