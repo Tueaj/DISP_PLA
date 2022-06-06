@@ -1,7 +1,4 @@
-﻿using CreditService.Models;
-using EventLibrary;
-using Microsoft.Extensions.Logging;
-using MongoDB.Bson;
+﻿using Microsoft.Extensions.Logging;
 
 namespace CreditService.Services;
 

@@ -1,7 +1,4 @@
 using System.Collections.Generic;
-using EventLibrary;
-using MessageHandling;
-using MessageHandling.Abstractions;
 using Microsoft.AspNetCore.Mvc;
 using OrderService.Models;
 using OrderService.Services;

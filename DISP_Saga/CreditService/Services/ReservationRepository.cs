@@ -1,9 +1,7 @@
 ﻿using System.Collections.Generic;
 using CreditService.Models;
-using MessageHandling;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace CreditService.Services;

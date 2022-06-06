@@ -1,8 +1,4 @@
-﻿using EventLibrary;
-using MessageHandling.Abstractions;
-using Microsoft.Extensions.Logging;
-
-namespace OrderService.Services;
+﻿namespace OrderService.Services;
 
 public class InventoryReservedEventHandler: EventHandler<InventoryReserved>
 {
