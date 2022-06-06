@@ -25,9 +25,9 @@ public class CreditRepository : ICreditRepository
         return _creditCollection.Find(_ => true).ToList();
     }
 
-    public Credit? GetCreditByCustomerId(string customerId)
+    public Credit? GetCreditByCustomerId(string creditId)
     {
-        return _creditCollection.Find(_ => _.CustomerId == customerId).FirstOrDefault();
+        return _creditCollection.Find(_ => _.CreditId == creditId).FirstOrDefault();
     }
 
     public void CreateCredit(Credit credit)
@@ -37,6 +37,11 @@ public class CreditRepository : ICreditRepository
 
     public void UpdateCredit(Credit credit)
     {
-        _creditCollection.UpdateOne(_ => _.CustomerId == credit.CustomerId, Builders<Credit>.Update.Set(_ => _.Amount, credit.Amount));
+        _creditCollection.UpdateOne(_ => _.CreditId == credit.CreditId, Builders<Credit>.Update.Set(_ => _.Amount, credit.Amount));
+    }
+
+    public void AddReservation(string creditId, Reservation reservation)
+    {
+        _creditCollection.UpdateOne(_ => _.CreditId == creditId, Builders<Credit>.Update.Set(_ => _.PendingReservation, reservation));
     }
 }

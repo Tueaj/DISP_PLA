@@ -1,6 +1,8 @@
-﻿namespace Messages
+﻿using MessageHandling.Abstractions;
+
+namespace Messages
 {
-    public class CommitInventory
+    public class CommitInventory : IMessage
     {
         public string OrderId;
 

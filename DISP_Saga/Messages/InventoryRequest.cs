@@ -1,6 +1,8 @@
-﻿namespace Messages
+﻿using MessageHandling.Abstractions;
+
+namespace Messages
 {
-    public class InventoryRequest
+    public class InventoryRequest : IMessage
     {
         public int Amount;
 

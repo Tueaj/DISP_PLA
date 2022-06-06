@@ -1,5 +1,6 @@
 using CreditService.Models;
 using CreditService.Services;
+using MessageHandling;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -8,7 +9,7 @@ using Microsoft.Extensions.Hosting;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddMessageHandling();
-builder.Services.AddMessageHandler<OrderCreatedHandler>();
+builder.Services.AddMessageHandler<CreditRequestHandler>();
 builder.Services.AddMessageHandler<OrderSucceededHandler>();
 builder.Services.AddMessageHandler<OrderFailedHandler>();
 

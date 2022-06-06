@@ -1,6 +1,8 @@
-﻿namespace Messages
+﻿using MessageHandling.Abstractions;
+
+namespace Messages
 {
-    public class CreditRequestAck
+    public class CreditRequestAck : IMessage
     {
         public string CreditId;
 

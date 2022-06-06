@@ -1,6 +1,8 @@
-﻿namespace Messages
+﻿using MessageHandling.Abstractions;
+
+namespace Messages
 {
-    public class CreditRequest
+    public class CreditRequest : IMessage
     {
         public int Amount;
 
