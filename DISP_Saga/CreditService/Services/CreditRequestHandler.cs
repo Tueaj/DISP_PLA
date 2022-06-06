@@ -1,29 +1,33 @@
 ﻿using CreditService.Models;
+using MessageHandling;
+using MessageHandling.Abstractions;
+using Messages;
 using Microsoft.Extensions.Logging;
+using MongoDB.Bson;
 
 namespace CreditService.Services;
 
-public class OrderCreatedHandler : EventHandler<OrderCreated>
+public class CreditRequestHandler : CommandHandler<CreditRequest>
 {
-    private readonly ILogger<OrderCreatedHandler> _logger;
+    private readonly ILogger<CreditRequestHandler> _logger;
     private readonly IMessageProducer _producer;
     private readonly ICreditRepository _creditRepository;
-    private readonly IReservationRepository _reservationRepository;
 
-    public OrderCreatedHandler(ILogger<OrderCreatedHandler> logger, IMessageProducer producer,
-        ICreditRepository creditRepository, IReservationRepository reservationRepository)
+    public CreditRequestHandler(
+        ILogger<CreditRequestHandler> logger, 
+        IMessageProducer producer,
+        ICreditRepository creditRepository)
     {
         _logger = logger;
         _producer = producer;
         _creditRepository = creditRepository;
-        _reservationRepository = reservationRepository;
     }
 
-    public override void Handle(OrderCreated message)
+    public override void Handle(CreditRequest message)
     {
         _logger.LogInformation(message.ToJson());
 
-        Credit? credit = _creditRepository.GetCreditByCustomerId(message.CustomerId);
+        Credit? credit = _creditRepository.GetCreditByCustomerId(message.CreditId);
 
         if (credit == null || credit.Amount < message.Total)
         {

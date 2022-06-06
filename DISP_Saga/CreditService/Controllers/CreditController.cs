@@ -42,7 +42,7 @@ namespace CreditService.Controllers
 
             if (foundCredit == null)
             {
-                _creditRepository.CreateCredit(new Credit {Amount = credit, CustomerId = id});
+                _creditRepository.CreateCredit(new Credit {Amount = credit, CreditId = id});
             }
             else
             {
