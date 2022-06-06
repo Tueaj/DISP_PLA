@@ -6,4 +6,8 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\MessageHandling\MessageHandling.csproj" />
+    </ItemGroup>
+
 </Project>

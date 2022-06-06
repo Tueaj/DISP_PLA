@@ -1,6 +1,8 @@
-﻿namespace Messages
+﻿using MessageHandling.Abstractions;
+
+namespace Messages
 {
-    public class CommitCreditAck
+    public class CommitCreditAck : IMessage
     {
         public string OrderId;
 
