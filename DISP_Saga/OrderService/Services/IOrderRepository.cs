@@ -5,9 +5,9 @@ namespace OrderService.Services;
 
 public interface IOrderRepository
 {
-    IEnumerable<Order> GetAllOrders();
-    Order? GetOrderByOrderId(string orderId);
-    void CreateOrder(Order order);
+    IEnumerable<CreateOrderRequest> GetAllOrders();
+    CreateOrderRequest? GetOrderByOrderId(string orderId);
+    void CreateOrder(CreateOrderRequest createOrderRequest);
     void DeleteOrder(string order);
     void CreditReserved(string orderId);
     void InventoryReserved(string orderId);

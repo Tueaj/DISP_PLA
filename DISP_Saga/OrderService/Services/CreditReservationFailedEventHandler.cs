@@ -17,7 +17,7 @@ public class CreditReservationFailedEventHandler: EventHandler<CreditReservation
 
     public override void Handle(CreditReservationFailed message)
     {
-        Order? order = _orderRepository.GetOrderByOrderId(message.OrderId);
+        CreateOrderRequest? order = _orderRepository.GetOrderByOrderId(message.OrderId);
 
         if (order == default)
         {

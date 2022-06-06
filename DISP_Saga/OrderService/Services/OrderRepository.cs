@@ -7,29 +7,29 @@ namespace OrderService.Services;
 
 public class OrderRepository : IOrderRepository
 {
-    private readonly IMongoCollection<Order> _orderCollection;
+    private readonly IMongoCollection<CreateOrderRequest> _orderCollection;
     
     public OrderRepository(IOptions<MongoConnectionSettings> settings)
     {
         var mongoClient = new MongoClient($"mongodb://{settings.Value.HostName}:{settings.Value.Port}");
         var mongoDatabase = mongoClient.GetDatabase(settings.Value.DatabaseName);
 
-        _orderCollection = mongoDatabase.GetCollection<Order>("Order");
+        _orderCollection = mongoDatabase.GetCollection<CreateOrderRequest>("Order");
     }
     
-    public IEnumerable<Order> GetAllOrders()
+    public IEnumerable<CreateOrderRequest> GetAllOrders()
     {
         return _orderCollection.Find(_ => true).ToList();
     }
 
-    public Order? GetOrderByOrderId(string orderId)
+    public CreateOrderRequest? GetOrderByOrderId(string orderId)
     {
         return _orderCollection.Find(order => order.OrderId == orderId).FirstOrDefault();
     }
 
-    public void CreateOrder(Order order)
+    public void CreateOrder(CreateOrderRequest createOrderRequest)
     {
-        _orderCollection.InsertOne(order);
+        _orderCollection.InsertOne(createOrderRequest);
     }
 
     public void DeleteOrder(string orderId)
@@ -39,13 +39,13 @@ public class OrderRepository : IOrderRepository
 
     public void CreditReserved(string orderId)
     {
-        var update = Builders<Order>.Update.Set(order => order.creditReserved, true);
+        var update = Builders<CreateOrderRequest>.Update.Set(order => order.creditReserved, true);
         _orderCollection.UpdateOneAsync(order => order.OrderId == orderId, update);
     }
 
     public void InventoryReserved(string orderId)
     {
-        var update = Builders<Order>.Update.Set(order => order.inventoryReserved, true);
+        var update = Builders<CreateOrderRequest>.Update.Set(order => order.inventoryReserved, true);
         _orderCollection.UpdateOneAsync(order => order.OrderId == orderId, update);
     }
 

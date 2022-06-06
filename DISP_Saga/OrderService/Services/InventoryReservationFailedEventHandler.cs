@@ -17,7 +17,7 @@ public class InventoryReservationFailedEventHandler: EventHandler<InventoryReser
 
     public override void Handle(InventoryReservationFailed message)
     {
-        Order? order = _orderRepository.GetOrderByOrderId(message.OrderId);
+        CreateOrderRequest? order = _orderRepository.GetOrderByOrderId(message.OrderId);
 
         if (order == default)
         {

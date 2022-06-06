@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using MessageHandling;
+using Messages;
 using Microsoft.AspNetCore.Mvc;
 using OrderService.Models;
 using OrderService.Services;
@@ -19,16 +21,16 @@ namespace OrderService.Controllers
         }
 
         [HttpGet]
-        public IEnumerable<Order> GetOrder()
+        public IEnumerable<CreateOrderRequest> GetOrder()
         {
             return _orderRepository.GetAllOrders();
         }
 
         [HttpGet("{id}")]
-        public ActionResult<Order> GetOrder(string id)
+        public ActionResult<CreateOrderRequest> GetOrder(string id)
         {
             var foundOrder = _orderRepository.GetOrderByOrderId(id);
-            
+
             if (foundOrder == null)
             {
                 return NotFound();
@@ -38,30 +40,24 @@ namespace OrderService.Controllers
         }
 
         [HttpPost("")]
-        public ActionResult<Order> CreateOrder(Order order)
+        public ActionResult<CreateOrderRequest> CreateOrder(CreateOrderRequest createOrderRequest)
         {
-            var foundOrder = _orderRepository.GetOrderByOrderId(order.OrderId);
-            order.creditReserved = false;
-            order.inventoryReserved = false;
-            
-            if (foundOrder == null)
-            {
-                _orderRepository.CreateOrder(order);
-            }
-            else
-            {
-                return Conflict();
-            }
+            _orderRepository.CreateOrder(createOrderRequest);
 
-            _messageProducer.ProduceMessage(new OrderCreated
+            _messageProducer.ProduceMessage(new CreditRequest
             {
-                OrderId = order.OrderId,
-                CustomerId = order.CustomerId,
-                Total =  order.Total,
-                OrderedItems = order.OrderedItems
+                OrderId = createOrderRequest.OrderId,
+                CustomerId = createOrderRequest.CustomerId,
+                Total = createOrderRequest.Total,
+                OrderedItems = createOrderRequest.OrderedItems
             }, QueueName.Command);
             
-            return Created("Order created", order);
+            _messageProducer.ProduceMessage(new InventoryRequest
+            {
+                
+            })
+
+            return Created("Order created", createOrderRequest);
         }
     }
 }
