@@ -1,8 +1,9 @@
 ﻿using MessageHandling.Abstractions;
 
-namespace EventLibrary;
-
-public class CreditReservationFailed : IMessage
+namespace EventLibrary
 {
-    public string OrderId;
+    public class CreditReservationFailed : IMessage
+    {
+        public string OrderId;
+    }
 }
