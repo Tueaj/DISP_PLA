@@ -4,7 +4,7 @@ namespace Messages
 {
     public class CreditRequest : IMessage
     {
-        public int Amount;
+        public double Amount;
 
         public string CreditId;
 
