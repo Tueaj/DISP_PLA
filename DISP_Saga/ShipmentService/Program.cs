@@ -1,4 +1,3 @@
-using MessageHandling;
 using Microsoft.AspNetCore.Builder;
 using ShipmentService;
 

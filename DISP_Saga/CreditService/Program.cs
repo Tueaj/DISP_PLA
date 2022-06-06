@@ -1,6 +1,5 @@
 using CreditService.Models;
 using CreditService.Services;
-using MessageHandling;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;

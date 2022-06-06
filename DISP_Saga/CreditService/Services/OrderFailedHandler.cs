@@ -1,7 +1,5 @@
 ﻿using CreditService.Models;
-using EventLibrary;
 using Microsoft.Extensions.Logging;
-using MongoDB.Bson;
 
 namespace CreditService.Services;
 

@@ -1,9 +1,5 @@
-﻿using EventLibrary;
-using InventoryService.Models;
-using MessageHandling;
-using MessageHandling.Abstractions;
+﻿using InventoryService.Models;
 using Microsoft.Extensions.Logging;
-using MongoDB.Bson;
 
 namespace InventoryService.Services;
 

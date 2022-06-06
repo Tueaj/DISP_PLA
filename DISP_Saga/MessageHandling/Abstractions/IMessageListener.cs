@@ -1,7 +1,4 @@
-﻿using System;
-using System.Runtime.InteropServices;
-
-namespace MessageHandling.Abstractions
+﻿namespace MessageHandling.Abstractions
 {
     /// <summary>
     /// API for synchronously and asynchronously retrieving an occurrence of a IMessage.

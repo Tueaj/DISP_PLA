@@ -1,6 +1,4 @@
-﻿using EventLibrary;
-using MessageHandling.Abstractions;
-using OrderService.Models;
+﻿using OrderService.Models;
 
 namespace OrderService.Services;
 
