@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using CreditService.Models;
+using CreditService.Repository;
 using CreditService.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -25,7 +26,7 @@ namespace CreditService.Controllers
         [HttpGet("{id}")]
         public ActionResult<Credit> GetCredit(string id)
         {
-            Credit? foundCredit = _creditRepository.GetCreditByCustomerId(id);
+            Credit? foundCredit = _creditRepository.GetCreditByCreditId(id);
 
             if (foundCredit == null)
             {
@@ -38,7 +39,7 @@ namespace CreditService.Controllers
         [HttpPut("{id}")]
         public IActionResult UpdateCredit([FromRoute] string id, [FromBody] double credit)
         {
-            Credit? foundCredit = _creditRepository.GetCreditByCustomerId(id);
+            Credit? foundCredit = _creditRepository.GetCreditByCreditId(id);
 
             if (foundCredit == null)
             {

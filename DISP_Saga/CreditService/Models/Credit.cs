@@ -8,5 +8,5 @@ public class Credit
 
     public double Amount;
 
-    public Reservation PendingReservation;
+    public Reservation? PendingReservation;
 }
