@@ -34,7 +34,7 @@ public class CreditRepository : ICreditRepository
 
     public void UpdateCredit(Credit credit)
     {
-        _creditCollection.UpdateOne(_ => _.CreditId == credit.CreditId, Builders<Credit>.Update.Set(_ => _.Amount, credit.Amount));
+        _creditCollection.ReplaceOne(_ => _.CreditId == credit.CreditId, credit);
     }
 
     public void AddReservation(string creditId, Reservation reservation)
