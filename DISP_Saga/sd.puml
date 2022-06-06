@@ -47,18 +47,19 @@ OrderService -> OrderDatabase: Is Order fully ACK
 activate OrderDatabase
 return True
 
-OrderService -> MessageQueue: Commit Order
+OrderService -> MessageQueue: Commit Credit
+OrderService -> MessageQueue: Commit Inventory
 deactivate OrderService
 
-MessageQueue -> CreditService: Commit Order
+MessageQueue -> CreditService: Commit Credit
 activate CreditService
-MessageQueue -> InventoryService: Commit Order
+MessageQueue -> InventoryService: Commit Inventory
 activate InventoryService
 
 CreditService -> CreditDatabase: Commit Credit
-CreditService -> MessageQueue: Credit Commited
+CreditService -> MessageQueue: Commit Credit ACK
 deactivate CreditService
-MessageQueue -> OrderService: Credit Commited
+MessageQueue -> OrderService: Commit Credit ACK
 activate OrderService
 OrderService -> OrderDatabase: Save Credit Commited
 OrderService -> OrderDatabase: Is Order fully Commited
@@ -71,9 +72,9 @@ deactivate OrderService
 
 
 InventoryService -> InventoryDatabase: Commit Inventory
-InventoryService -> MessageQueue: Inventory Commited
+InventoryService -> MessageQueue: Commit Inventory ACK
 deactivate InventoryService
-MessageQueue -> OrderService: Inventory Commited
+MessageQueue -> OrderService: Commit Inventory ACK
 activate OrderService
 OrderService -> OrderDatabase: Save Inventory Commited
 OrderService -> OrderDatabase: Is Order fully Commited
