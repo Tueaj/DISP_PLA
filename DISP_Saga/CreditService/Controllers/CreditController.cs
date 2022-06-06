@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using CreditService.Models;
 using CreditService.Repository;
-using CreditService.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CreditService.Controllers
