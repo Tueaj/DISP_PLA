@@ -1,3 +1,5 @@
+using MessageHandling;
+using Messages;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -8,10 +10,7 @@ using OrderService.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddMessageHandling();
-builder.Services.AddMessageHandler<CreditReservedEventHandler>();
-builder.Services.AddMessageHandler<CreditReservationFailedEventHandler>();
-builder.Services.AddMessageHandler<InventoryReservedEventHandler>();
-builder.Services.AddMessageHandler<InventoryReservationFailedEventHandler>();
+builder.Services.AddMessageHandler<CreditRequestAckHandler>();
 
 builder.Services.AddOptions<MongoConnectionSettings>()
     .Configure<IConfiguration>((options, configuration) =>

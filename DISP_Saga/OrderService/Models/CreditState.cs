@@ -2,10 +2,10 @@
 {
     public class CreditState
     {
-        public int Amount;
+        public double Amount;
 
         public string CreditId;
         
-        public TransactionStatus Status;
+        public TransactionStatus Status = TransactionStatus.PENDING;
     }
 }

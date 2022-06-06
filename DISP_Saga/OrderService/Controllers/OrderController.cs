@@ -1,5 +1,6 @@
-using System.Collections.Generic;
+using System.Linq;
 using MessageHandling;
+using MessageHandling.Abstractions;
 using Messages;
 using Microsoft.AspNetCore.Mvc;
 using OrderService.Models;
@@ -20,44 +21,43 @@ namespace OrderService.Controllers
             _messageProducer = messageProducer;
         }
 
-        [HttpGet]
-        public IEnumerable<CreateOrderRequest> GetOrder()
-        {
-            return _orderRepository.GetAllOrders();
-        }
-
-        [HttpGet("{id}")]
-        public ActionResult<CreateOrderRequest> GetOrder(string id)
-        {
-            var foundOrder = _orderRepository.GetOrderByOrderId(id);
-
-            if (foundOrder == null)
-            {
-                return NotFound();
-            }
-
-            return Ok(foundOrder);
-        }
-
         [HttpPost("")]
         public ActionResult<CreateOrderRequest> CreateOrder(CreateOrderRequest createOrderRequest)
         {
-            _orderRepository.CreateOrder(createOrderRequest);
+            var order = new Order
+            {
+                Credit = new CreditState
+                {
+                    Amount = createOrderRequest.CreditRequired,
+                    CreditId = createOrderRequest.CreditId
+                },
+                Inventory = createOrderRequest.OrderedItems.Select(pair => new InventoryState
+                {
+                    ItemId = pair.Key,
+                    Amount = pair.Value
+                }).ToList()
+            };
+
+            _orderRepository.CreateOrder(order);
 
             _messageProducer.ProduceMessage(new CreditRequest
             {
-                OrderId = createOrderRequest.OrderId,
-                CustomerId = createOrderRequest.CustomerId,
-                Total = createOrderRequest.Total,
-                OrderedItems = createOrderRequest.OrderedItems
+                OrderId = order.OrderId,
+                CreditId = order.Credit.CreditId,
+                Amount = order.Credit.Amount
             }, QueueName.Command);
             
-            _messageProducer.ProduceMessage(new InventoryRequest
+            foreach (var inventoryState in order.Inventory)
             {
-                
-            })
-
-            return Created("Order created", createOrderRequest);
+                _messageProducer.ProduceMessage(new InventoryRequest
+                {
+                    OrderId = order.OrderId,
+                    ItemId =  inventoryState.ItemId,
+                    Amount = inventoryState.Amount,
+                }, QueueName.Command);
+            }
+            
+            return Created("Order creation begun", createOrderRequest);
         }
     }
 }
