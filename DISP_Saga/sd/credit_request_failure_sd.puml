@@ -1,0 +1,85 @@
+@startuml
+skinparam SequenceMessageAlignment center
+actor Client
+
+participant OrderService
+participant OrderDatabase
+
+participant MessageQueue
+
+participant CreditService
+participant CreditDatabase
+
+participant InventoryService
+participant InventoryDatabase
+
+participant ShipmentService
+
+Client -> OrderService: Create order
+activate OrderService
+OrderService -> OrderDatabase: Create pending order
+OrderService -> MessageQueue: Request Credit
+OrderService -> MessageQueue: Request Inventory
+deactivate OrderService
+
+MessageQueue -> CreditService: Request Credit
+activate CreditService
+MessageQueue -> InventoryService: Request Inventory
+activate InventoryService
+
+CreditService -> CreditDatabase: Reserve Credit
+CreditService -> MessageQueue: ACK Request Credit
+deactivate CreditService
+MessageQueue -> OrderService: ACK Request Credit
+activate OrderService
+OrderService -> OrderDatabase: Save Credit ACK
+OrderService -> OrderDatabase: Check for NACK
+activate OrderDatabase
+return False
+deactivate OrderService
+
+InventoryService -> InventoryDatabase: Reserve Inventory
+activate InventoryDatabase
+InventoryDatabase -> InventoryService: Not enough inventory
+deactivate InventoryDatabase
+InventoryService -> MessageQueue: NACK Request Inventory
+deactivate InventoryService
+MessageQueue -> OrderService: NACK Request Inventory
+activate OrderService
+OrderService -> OrderDatabase: Save Inventory NACK
+OrderService -> OrderDatabase: Check for NACK
+activate OrderDatabase
+return true
+
+
+OrderService -> MessageQueue: Abort Request
+MessageQueue -> CreditService: Abort Request
+MessageQueue -> InventoryService: Abort Request
+activate InventoryService
+activate CreditService
+CreditService -> CreditDatabase: Remove reservation
+CreditService -> MessageQueue : ACK Abort Request Credit
+deactivate CreditService
+MessageQueue -> OrderService : ACK Abort Request Credit
+OrderService -> OrderDatabase : Save abort credit ACK
+activate OrderDatabase
+OrderService -> OrderDatabase : Is Abort fully ACK
+return false
+
+InventoryService -> InventoryDatabase: Remove reservation
+InventoryService -> MessageQueue: ACK Abort Request Inventory
+deactivate InventoryService
+MessageQueue -> OrderService: ACK Abort Request Inventory
+OrderService -> OrderDatabase: Save abort inventory ACK
+OrderService -> OrderDatabase: is abort fully ACK
+activate OrderDatabase
+return true
+
+
+deactivate OrderService
+
+
+
+
+
+@enduml

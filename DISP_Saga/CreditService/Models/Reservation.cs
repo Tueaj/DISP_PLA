@@ -1,6 +1,4 @@
-﻿using MongoDB.Bson.Serialization.Attributes;
-
-namespace CreditService.Models;
+﻿namespace CreditService.Models;
 
 public class Reservation
 {

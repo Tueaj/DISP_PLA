@@ -1,4 +1,6 @@
-﻿using CreditService.Models;
+﻿using System;
+using CreditService.Models;
+using CreditService.Repository;
 using MessageHandling;
 using MessageHandling.Abstractions;
 using Messages;
@@ -27,25 +29,27 @@ public class CreditRequestHandler : CommandHandler<CreditRequest>
     {
         _logger.LogInformation(message.ToJson());
 
-        Credit? credit = _creditRepository.GetCreditByCustomerId(message.CreditId);
-
-        if (credit == null || credit.Amount < message.Total)
+        Credit? credit = _creditRepository.GetCreditByCreditId(message.CreditId);
+        
+        if (credit.PendingReservation is not null)
         {
-            _producer.ProduceMessage(new CreditReservationFailed() {OrderId = message.OrderId}, QueueName.Command);
+            throw new Exception(); //fix type of exception
+        }
+
+        if (credit == null || credit.Amount < message.Amount)
+        {
+            //_producer.ProduceMessage(new CreditReservationFailed() {OrderId = message.OrderId}, QueueName.Command);
             return;
         }
 
-        credit.Amount -= message.Total;
-
-        _creditRepository.UpdateCredit(credit);
-
-        _reservationRepository.CreateReservation(new Reservation
+        var reservation = new Reservation
         {
-            Amount = message.Total,
-            CustomerId = message.CustomerId,
-            OrderId = message.OrderId
-        });
+            OrderId = message.OrderId,
+            Amount = message.Amount
+        };
 
-        _producer.ProduceMessage(new CreditReserved {OrderId = message.OrderId}, QueueName.Command);
+        _creditRepository.AddReservation(message.CreditId, reservation);
+
+        _producer.ProduceMessage(new CreditRequestAck {OrderId = message.OrderId, CreditId = message.CreditId}, QueueName.Command);
     }
 }

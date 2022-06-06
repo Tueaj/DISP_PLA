@@ -1,4 +1,5 @@
 using CreditService.Models;
+using CreditService.Repository;
 using CreditService.Services;
 using MessageHandling;
 using Microsoft.AspNetCore.Builder;
@@ -10,8 +11,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddMessageHandling();
 builder.Services.AddMessageHandler<CreditRequestHandler>();
-builder.Services.AddMessageHandler<OrderSucceededHandler>();
-builder.Services.AddMessageHandler<OrderFailedHandler>();
+builder.Services.AddMessageHandler<CommitCreditHandler>();
 
 builder.Services.AddOptions<MongoConnectionSettings>()
     .Configure<IConfiguration>((options, configuration) =>
@@ -31,7 +31,6 @@ builder.Services.AddControllers()
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSingleton<ICreditRepository, CreditRepository>();
-builder.Services.AddSingleton<IReservationRepository, ReservationRepository>();
 
 var app = builder.Build();
 

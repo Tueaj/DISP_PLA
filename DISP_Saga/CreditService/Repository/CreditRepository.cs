@@ -1,19 +1,16 @@
 ﻿using System.Collections.Generic;
 using CreditService.Models;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 
-namespace CreditService.Services;
+namespace CreditService.Repository;
 
 public class CreditRepository : ICreditRepository
 {
-    private readonly ILogger<CreditRepository> _logger;
     private readonly IMongoCollection<Credit> _creditCollection;
     
-    public CreditRepository(ILogger<CreditRepository> logger, IOptions<MongoConnectionSettings> settings)
+    public CreditRepository(IOptions<MongoConnectionSettings> settings)
     {
-        _logger = logger;
         var mongoClient = new MongoClient($"mongodb://{settings.Value.HostName}:{settings.Value.Port}");
         var mongoDatabase = mongoClient.GetDatabase(settings.Value.DatabaseName);
 
@@ -25,7 +22,7 @@ public class CreditRepository : ICreditRepository
         return _creditCollection.Find(_ => true).ToList();
     }
 
-    public Credit? GetCreditByCustomerId(string creditId)
+    public Credit? GetCreditByCreditId(string creditId)
     {
         return _creditCollection.Find(_ => _.CreditId == creditId).FirstOrDefault();
     }
@@ -37,7 +34,7 @@ public class CreditRepository : ICreditRepository
 
     public void UpdateCredit(Credit credit)
     {
-        _creditCollection.UpdateOne(_ => _.CreditId == credit.CreditId, Builders<Credit>.Update.Set(_ => _.Amount, credit.Amount));
+        _creditCollection.ReplaceOne(_ => _.CreditId == credit.CreditId, credit);
     }
 
     public void AddReservation(string creditId, Reservation reservation)
