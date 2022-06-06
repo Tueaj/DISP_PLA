@@ -25,7 +25,7 @@ namespace InventoryService.Controllers
         [HttpGet("{id}")]
         public ActionResult<Item> GetItem(string id)
         {
-            Item? foundItem = _inventoryRepository.GetItemByName(id);
+            Item? foundItem = _inventoryRepository.GetItemById(id);
 
             if (foundItem == null)
             {
@@ -38,7 +38,7 @@ namespace InventoryService.Controllers
         [HttpPut("{id}")]
         public IActionResult UpdateItem([FromRoute] string id, [FromBody] int amount)
         {
-            Item? item = _inventoryRepository.GetItemByName(id);
+            Item? item = _inventoryRepository.GetItemById(id);
 
             if (item == null)
             {
@@ -47,7 +47,7 @@ namespace InventoryService.Controllers
             else
             {
                 item.Amount = amount;
-                _inventoryRepository.UpdateItem(item);
+                _inventoryRepository.ReplaceItem(item);
             }
 
             return Ok();

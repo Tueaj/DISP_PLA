@@ -1,5 +1,6 @@
 using InventoryService.Models;
 using InventoryService.Services;
+using MessageHandling;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -8,9 +9,8 @@ using Microsoft.Extensions.Hosting;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddMessageHandling();
-builder.Services.AddMessageHandler<OrderCreatedHandler>();
-builder.Services.AddMessageHandler<OrderSucceededHandler>();
-builder.Services.AddMessageHandler<OrderFailedHandler>();
+builder.Services.AddMessageHandler<InventoryRequestHandler>();
+builder.Services.AddMessageHandler<CommitInventoryHandler>();
 
 builder.Services.AddOptions<MongoConnectionSettings>()
     .Configure<IConfiguration>((options, configuration) =>

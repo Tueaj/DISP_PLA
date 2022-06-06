@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using InventoryService.Models;
+using Messages;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
@@ -9,7 +10,7 @@ namespace InventoryService.Services;
 public class InventoryRepository : IInventoryRepository
 {
     private readonly ILogger<InventoryRepository> _logger;
-    private readonly IMongoCollection<Item> _creditCollection;
+    private readonly IMongoCollection<Item> _inventoryCollection;
     
     public InventoryRepository(ILogger<InventoryRepository> logger, IOptions<MongoConnectionSettings> settings)
     {
@@ -17,26 +18,38 @@ public class InventoryRepository : IInventoryRepository
         var mongoClient = new MongoClient($"mongodb://{settings.Value.HostName}:{settings.Value.Port}");
         var mongoDatabase = mongoClient.GetDatabase(settings.Value.DatabaseName);
 
-        _creditCollection = mongoDatabase.GetCollection<Item>("Item");
+        _inventoryCollection = mongoDatabase.GetCollection<Item>("Item");
     }
 
     public IEnumerable<Item> GetAllItems()
     {
-        return _creditCollection.Find(_ => true).ToList();
+        return _inventoryCollection.Find(_ => true).ToList();
     }
 
-    public Item? GetItemByName(string name)
+    public Item? GetItemById(string id)
     {
-        return _creditCollection.Find(_ => _.Name == name).FirstOrDefault();
+        return _inventoryCollection.Find(_ => _.ItemId == id).FirstOrDefault();
     }
 
     public void CreateItem(Item item)
     {
-        _creditCollection.InsertOne(item);
+        _inventoryCollection.InsertOne(item);
     }
 
-    public void UpdateItem(Item item)
+    public void SetReservationOnItem(InventoryRequest request)
     {
-        _creditCollection.UpdateOne(_ => _.Name == item.Name, Builders<Item>.Update.Set(_ => _.Amount, item.Amount));
+        Reservation reservation = new Reservation
+        {
+            Amount = request.Amount,
+            OrderId = request.OrderId
+        };
+
+        _inventoryCollection.UpdateOne(_ => _.ItemId == request.ItemId,
+            Builders<Item>.Update.Set(_ => _.PendingReservation, reservation));
+    }
+
+    public void ReplaceItem(Item item)
+    {
+        _inventoryCollection.ReplaceOne(_ => _.ItemId == item.ItemId, item);
     }
 }

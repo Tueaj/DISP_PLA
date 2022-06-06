@@ -7,5 +7,5 @@ public class Reservation
 {
     [BsonId] public string OrderId;
 
-    public List<Item> ItemReservations = new();
+    public int Amount;
 }
