@@ -1,0 +1,100 @@
+@startuml
+actor Client
+
+participant OrderService
+participant OrderDatabase
+
+participant MessageQueue
+
+participant CreditService
+participant CreditDatabase
+
+participant InventoryService
+participant InventoryDatabase
+
+participant ShipmentService
+
+Client -> OrderService: Create order
+activate OrderService
+OrderService -> OrderDatabase: Create pending order
+OrderService -> MessageQueue: Request Credit
+OrderService -> MessageQueue: Request Inventory
+deactivate OrderService
+
+MessageQueue -> CreditService: Request Credit
+activate CreditService
+MessageQueue -> InventoryService: Request Inventory
+activate InventoryService
+
+CreditService -> CreditDatabase: Reserve Credit
+CreditService -> MessageQueue: ACK Request Credit
+deactivate CreditService
+MessageQueue -> OrderService: ACK Request Credit
+activate OrderService
+OrderService -> OrderDatabase: Save Credit ACK
+OrderService -> OrderDatabase: Is Order fully ACK
+activate OrderDatabase
+return False
+deactivate OrderService
+
+InventoryService -> InventoryDatabase: Reserve Inventory
+InventoryService -> MessageQueue: ACK Request Inventory
+deactivate InventoryService
+MessageQueue -> OrderService: ACK Request Inventory
+activate OrderService
+OrderService -> OrderDatabase: Save Inventory ACK
+OrderService -> OrderDatabase: Is Order fully ACK
+activate OrderDatabase
+return True
+
+OrderService -> MessageQueue: Commit Order
+deactivate OrderService
+
+MessageQueue -> CreditService: Commit Order
+activate CreditService
+MessageQueue -> InventoryService: Commit Order
+activate InventoryService
+
+CreditService -> CreditDatabase: Commit Credit
+CreditService -> MessageQueue: Credit Commited
+deactivate CreditService
+MessageQueue -> OrderService: Credit Commited
+activate OrderService
+OrderService -> OrderDatabase: Save Credit Commited
+OrderService -> OrderDatabase: Is Order fully Commited
+activate OrderDatabase
+return False
+deactivate OrderService
+
+
+
+
+
+InventoryService -> InventoryDatabase: Commit Inventory
+InventoryService -> MessageQueue: Inventory Commited
+deactivate InventoryService
+MessageQueue -> OrderService: Inventory Commited
+activate OrderService
+OrderService -> OrderDatabase: Save Inventory Commited
+OrderService -> OrderDatabase: Is Order fully Commited
+activate OrderDatabase
+return True
+OrderService -> MessageQueue: Ship Order
+deactivate OrderService
+
+MessageQueue -> ShipmentService: Ship Order
+activate ShipmentService
+ShipmentService -> ShipmentService: Ship Order
+ShipmentService -> MessageQueue: Order Shipped
+deactivate ShipmentService
+
+MessageQueue -> OrderService: Order Shipped
+activate OrderService
+OrderService -> OrderDatabase: Order Completed
+OrderService -> Client: Order Completed
+deactivate OrderService
+
+
+
+
+@enduml
