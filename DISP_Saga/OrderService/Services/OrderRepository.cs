@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+﻿using System;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using OrderService.Models;
@@ -19,12 +19,18 @@ namespace OrderService.Services
 
         public void CreateOrder(Order order)
         {
+            order.OrderId = Guid.NewGuid().ToString();
             _orderCollection.InsertOne(order);
         }
 
         public Order GetOrderById(string id)
         {
             return _orderCollection.FindSync(_ => _.OrderId == id).First();
+        }
+
+        public void UpdateOrder(Order order)
+        {
+            _orderCollection.FindOneAndReplace(_ => _.OrderId == order.OrderId, order);
         }
     }
 }

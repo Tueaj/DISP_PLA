@@ -1,5 +1,4 @@
 using MessageHandling;
-using Messages;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -11,6 +10,10 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddMessageHandling();
 builder.Services.AddMessageHandler<CreditRequestAckHandler>();
+builder.Services.AddMessageHandler<InventoryRequestAckHandler>();
+builder.Services.AddMessageHandler<ShipOrderAckHandler>();
+builder.Services.AddMessageHandler<CommitCreditAckHandler>();
+builder.Services.AddMessageHandler<CommitInventoryAckHandler>();
 
 builder.Services.AddOptions<MongoConnectionSettings>()
     .Configure<IConfiguration>((options, configuration) =>
@@ -26,12 +29,12 @@ builder.Services.AddControllers()
         configure.JsonSerializerOptions.IncludeFields = true;
     });
 
-builder.Services.AddScoped<OrderLogic>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSingleton<IOrderRepository, OrderRepository>();
+builder.Services.AddSingleton<OrderStatusService>();
 
 var app = builder.Build();
 

@@ -42,7 +42,7 @@ namespace InventoryService.Controllers
 
             if (item == null)
             {
-                _inventoryRepository.CreateItem(new Item {Amount = amount, Name = id});
+                _inventoryRepository.CreateItem(new Item {Amount = amount, ItemId = id});
             }
             else
             {

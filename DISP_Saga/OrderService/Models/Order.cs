@@ -11,5 +11,14 @@ namespace OrderService.Models
         public CreditState Credit;
 
         public IList<InventoryState> Inventory;
+
+        public OrderStatus Status = OrderStatus.PENDING;
+    }
+
+    public enum OrderStatus
+    {
+        PENDING,
+        FAILED,
+        COMPLETED
     }
 }
