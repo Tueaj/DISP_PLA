@@ -26,7 +26,7 @@ namespace OrderService.Services
         {
             _logger.LogInformation(message.ToJson());
 
-            var order = _orderRepository.GetOrderById(message.OrderId);
+            var order = _orderRepository.GetOrderById(message.TransactionId);
 
             if (order.Credit.Status == TransactionStatus.PENDING)
             {

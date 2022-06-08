@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System.Linq;
 using CreditService.Models;
 using CreditService.Repository;
 using MessageHandling;
@@ -16,7 +16,7 @@ namespace CreditService.Services
         private readonly ICreditRepository _creditRepository;
 
         public CreditRequestHandler(
-            ILogger<CreditRequestHandler> logger, 
+            ILogger<CreditRequestHandler> logger,
             IMessageProducer producer,
             ICreditRepository creditRepository)
         {
@@ -29,28 +29,73 @@ namespace CreditService.Services
         {
             _logger.LogInformation(message.ToJson());
 
-            Credit? credit = _creditRepository.GetCreditByCreditId(message.CreditId);
-        
-            if (credit.PendingReservation is not null)
+            if (!_creditRepository.CreditExists(message.CreditId))
             {
-                throw new Exception(); //fix type of exception
-            }
-
-            if (credit == null || credit.Amount < message.Amount)
-            {
-                //_producer.ProduceMessage(new CreditReservationFailed() {OrderId = message.OrderId}, QueueName.Command);
+                _producer.ProduceMessage(new CreditRequestNack
+                {
+                    CreditId = message.CreditId,
+                    TransactionId = message.TransactionId
+                }, QueueName.Command);
                 return;
             }
 
-            var reservation = new Reservation
+            // Ignore the constraint exception - If we fail to acquire the lock, we should just throw, re-queue,
+            // and try again.
+            Credit credit = _creditRepository.AcquireCredit(message.CreditId, message.TransactionId);
+
+            if (credit.Amount < message.Amount)
             {
-                OrderId = message.OrderId,
-                Amount = message.Amount
+                _producer.ProduceMessage(new CreditRequestNack
+                {
+                    CreditId = message.CreditId,
+                    TransactionId = message.TransactionId
+                }, QueueName.Command);
+                return;
+            }
+
+            var existingChange = credit.ChangeLog.FirstOrDefault(log => log.TransactionId == message.TransactionId);
+
+            if (existingChange != default)
+            {
+                if (existingChange.Status == CreditChangeStatus.Aborted)
+                {
+                    _producer.ProduceMessage(new CreditRequestNack
+                    {
+                        CreditId = message.CreditId,
+                        TransactionId = message.TransactionId
+                    }, QueueName.Command);
+                }
+                else
+                {
+                    _producer.ProduceMessage(
+                        new CreditRequestAck {TransactionId = message.TransactionId, CreditId = message.CreditId},
+                        QueueName.Command);
+                }
+
+                if (existingChange.Status != CreditChangeStatus.Pending)
+                {
+                    _creditRepository.ReleaseCredit(message.CreditId, message.TransactionId);
+                }
+
+                return;
+            }
+
+            var creditChange = new CreditChange
+            {
+                Amount = message.Amount,
+                Status = CreditChangeStatus.Pending,
+                TransactionId = message.TransactionId
             };
 
-            _creditRepository.AddReservation(message.CreditId, reservation);
+            credit.ChangeLog.Add(creditChange);
 
-            _producer.ProduceMessage(new CreditRequestAck {OrderId = message.OrderId, CreditId = message.CreditId}, QueueName.Command);
+            _creditRepository.UpdateCredit(credit, message.TransactionId);
+
+            // Don't release lock on credit, we need to keep it until the commit is completed
+
+            _producer.ProduceMessage(
+                new CreditRequestAck {TransactionId = message.TransactionId, CreditId = message.CreditId},
+                QueueName.Command);
         }
     }
 }

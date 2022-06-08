@@ -4,7 +4,7 @@ namespace Messages
 {
     public class CommitInventory : IMessage
     {
-        public string OrderId;
+        public string TransactionId;
 
         public string ItemId;
     }

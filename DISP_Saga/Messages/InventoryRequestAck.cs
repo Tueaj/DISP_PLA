@@ -6,6 +6,6 @@ namespace Messages
     {
         public string ItemId;
 
-        public string OrderId;
+        public string TransactionId;
     }
 }

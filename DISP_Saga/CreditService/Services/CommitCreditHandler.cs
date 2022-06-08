@@ -15,7 +15,7 @@ namespace CreditService.Services
         private readonly ICreditRepository _creditRepository;
 
         public CommitCreditHandler(
-            ILogger<CommitCreditHandler> logger, 
+            ILogger<CommitCreditHandler> logger,
             IMessageProducer producer,
             ICreditRepository creditRepository)
         {
@@ -28,14 +28,44 @@ namespace CreditService.Services
         {
             _logger.LogInformation(message.ToJson());
 
-            Credit credit = _creditRepository.GetCreditByCreditId(message.CreditId);
-        
-            credit.Amount -= credit.PendingReservation.Amount;
-            credit.PendingReservation = null;
-        
-            _creditRepository.UpdateCredit(credit);
+            // Ignore the constraint exception - If we fail to acquire the lock, we should just throw, re-queue,
+            // and try again.
+            Credit credit = _creditRepository.AcquireCredit(message.CreditId, message.TransactionId);
 
-            _producer.ProduceMessage(new CommitCreditAck {OrderId = message.OrderId, CreditId = message.CreditId}, QueueName.Command);
+            var change = credit.ChangeLog.Find(change => change.TransactionId == message.TransactionId);
+
+            if (change is not {Status: CreditChangeStatus.Pending})
+            {
+                if (change?.Status == CreditChangeStatus.Aborted)
+                {
+                    _producer.ProduceMessage(new CommitCreditNack
+                        {
+                            TransactionId = message.TransactionId,
+                            CreditId = message.CreditId
+                        },
+                        QueueName.Command);
+                }
+                else
+                {
+                    _producer.ProduceMessage(
+                        new CommitCreditAck {TransactionId = message.TransactionId, CreditId = message.CreditId},
+                        QueueName.Command);
+                }
+
+                _creditRepository.ReleaseCredit(message.CreditId, message.TransactionId);
+
+                return;
+            }
+
+            credit.Amount += change.Amount;
+            change.Status = CreditChangeStatus.Performed;
+
+            _creditRepository.UpdateCredit(credit, message.TransactionId);
+            _creditRepository.ReleaseCredit(message.CreditId, message.TransactionId);
+
+            _producer.ProduceMessage(
+                new CommitCreditAck {TransactionId = message.TransactionId, CreditId = message.CreditId},
+                QueueName.Command);
         }
     }
 }

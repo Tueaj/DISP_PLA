@@ -2,7 +2,7 @@
 
 namespace Messages
 {
-    public class CommitInventoryAck : IMessage
+    public class CommitInventoryNack : IMessage
     {
         public string TransactionId;
 

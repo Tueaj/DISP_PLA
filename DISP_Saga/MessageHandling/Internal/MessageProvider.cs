@@ -58,7 +58,7 @@ namespace MessageHandling.Internal
                     catch (Exception e)
                     {
                         _logger.LogError(e, "Failed to handle message with Routing Key: {}, sent on Exchange: {}", ea.RoutingKey, ea.Exchange);
-                        channel.BasicNack(ea.DeliveryTag, false, false);
+                        channel.BasicNack(ea.DeliveryTag, false, true);
                     }
                 };
 

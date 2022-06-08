@@ -27,7 +27,7 @@ namespace OrderService.Services
         {
             _logger.LogInformation(message.ToJson());
 
-            var order = _orderRepository.GetOrderById(message.OrderId);
+            var order = _orderRepository.GetOrderById(message.TransactionId);
 
             var inventoryItem = order.Inventory.First(i => i.ItemId == message.ItemId);
 

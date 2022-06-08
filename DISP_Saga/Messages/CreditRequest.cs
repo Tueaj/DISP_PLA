@@ -8,6 +8,6 @@ namespace Messages
 
         public string CreditId;
 
-        public string OrderId;
+        public string TransactionId;
     }
 }

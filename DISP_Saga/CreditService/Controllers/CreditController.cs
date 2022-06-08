@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using CreditService.Models;
 using CreditService.Repository;
@@ -42,12 +43,18 @@ namespace CreditService.Controllers
 
             if (foundCredit == null)
             {
-                _creditRepository.CreateCredit(new Credit {Amount = credit, CreditId = id});
+                _creditRepository.CreateCredit(new Credit
+                {
+                    Amount = credit, 
+                    CreditId = id,
+                    ChangeLog = new List<CreditChange>(),
+                    Lock = null
+                });
             }
             else
             {
                 foundCredit.Amount = credit;
-                _creditRepository.UpdateCredit(foundCredit);
+                _creditRepository.UpdateCredit(foundCredit, Guid.NewGuid().ToString());
             }
 
             return Ok();

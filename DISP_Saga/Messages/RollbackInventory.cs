@@ -2,7 +2,7 @@
 
 namespace Messages
 {
-    public class CommitInventoryAck : IMessage
+    public class RollbackInventory : IMessage
     {
         public string TransactionId;
 

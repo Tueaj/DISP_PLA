@@ -1,12 +1,13 @@
-﻿namespace CreditService.Models;
-
-public class MongoConnectionSettings
+﻿namespace CreditService.Models
 {
-    public const string Key = "MongoConnection";
+    public class MongoConnectionSettings
+    {
+        public const string Key = "MongoConnection";
     
-    public string HostName { get; set; }
+        public string HostName { get; set; }
 
-    public int Port { get; set; }
+        public int Port { get; set; }
     
-    public string DatabaseName { get; set; }
+        public string DatabaseName { get; set; }
+    }
 }

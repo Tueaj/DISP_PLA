@@ -41,7 +41,7 @@ public class InventoryRepository : IInventoryRepository
         Reservation reservation = new Reservation
         {
             Amount = request.Amount,
-            OrderId = request.OrderId
+            OrderId = request.TransactionId
         };
 
         _inventoryCollection.UpdateOne(_ => _.ItemId == request.ItemId,

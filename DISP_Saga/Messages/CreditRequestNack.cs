@@ -2,7 +2,7 @@
 
 namespace Messages
 {
-    public class CreditRequestAck : IMessage
+    public class CreditRequestNack : IMessage
     {
         public string CreditId;
 

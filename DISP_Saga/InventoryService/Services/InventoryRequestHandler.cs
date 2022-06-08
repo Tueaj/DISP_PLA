@@ -42,7 +42,7 @@ namespace InventoryService.Services
             
             _inventoryRepository.SetReservationOnItem(message);
             
-            _producer.ProduceMessage(new InventoryRequestAck {OrderId = message.OrderId, ItemId = message.ItemId}, QueueName.Command);
+            _producer.ProduceMessage(new InventoryRequestAck {TransactionId = message.TransactionId, ItemId = message.ItemId}, QueueName.Command);
         }
     }
 }

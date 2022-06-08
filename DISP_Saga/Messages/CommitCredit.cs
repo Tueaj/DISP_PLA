@@ -4,7 +4,7 @@ namespace Messages
 {
     public class CommitCredit : IMessage
     {
-        public string OrderId;
+        public string TransactionId;
 
         public string CreditId;
     }

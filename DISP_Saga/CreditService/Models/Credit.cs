@@ -1,12 +1,25 @@
-﻿using MongoDB.Bson.Serialization.Attributes;
+﻿using System;
+using System.Collections.Generic;
+using MongoDB.Bson.Serialization.Attributes;
 
-namespace CreditService.Models;
-
-public class Credit
+namespace CreditService.Models
 {
-    [BsonId] public string CreditId;
+    public class Credit
+    {
+        [BsonId]
+        public string CreditId;
 
-    public double Amount;
+        public double Amount;
 
-    public Reservation? PendingReservation;
+        public CreditLock? Lock;
+
+        public List<CreditChange> ChangeLog;
+    }
+
+    public class CreditLock
+    {
+        public string LockedBy;
+
+        public DateTime LockedAt;
+    }
 }

@@ -41,7 +41,7 @@ namespace OrderService.Services
 
                 _messageProducer.ProduceMessage(new CommitCredit
                 {
-                    OrderId = order.OrderId,
+                    TransactionId = order.OrderId,
                     CreditId = order.Credit.CreditId
                 }, QueueName.Command);
                 foreach (var inventoryState in order.Inventory)
@@ -50,7 +50,7 @@ namespace OrderService.Services
 
                     _messageProducer.ProduceMessage(new CommitInventory
                     {
-                        OrderId = order.OrderId,
+                        TransactionId = order.OrderId,
                         ItemId = inventoryState.ItemId
                     }, QueueName.Command);
                 }

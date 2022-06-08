@@ -32,7 +32,7 @@ namespace InventoryService.Services
         
             _inventoryRepository.ReplaceItem(item);
 
-            _producer.ProduceMessage(new CommitInventoryAck() {OrderId = message.OrderId, ItemId = message.ItemId}, QueueName.Command);
+            _producer.ProduceMessage(new CommitInventoryAck() {TransactionId = message.TransactionId, ItemId = message.ItemId}, QueueName.Command);
         }
     }
 }
