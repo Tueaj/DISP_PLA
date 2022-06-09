@@ -43,16 +43,6 @@ namespace CreditService.Services
             // and try again.
             Credit credit = _creditRepository.AcquireCredit(message.CreditId, message.TransactionId);
 
-            if (credit.Amount < message.Amount)
-            {
-                _producer.ProduceMessage(new CreditRequestNack
-                {
-                    CreditId = message.CreditId,
-                    TransactionId = message.TransactionId
-                }, QueueName.Command);
-                return;
-            }
-
             var existingChange = credit.ChangeLog.FirstOrDefault(log => log.TransactionId == message.TransactionId);
 
             if (existingChange != default)
@@ -77,6 +67,17 @@ namespace CreditService.Services
                     _creditRepository.ReleaseCredit(message.CreditId, message.TransactionId);
                 }
 
+                return;
+            }
+            
+            if (credit.Amount < message.Amount)
+            {
+                _creditRepository.ReleaseCredit(message.CreditId, message.TransactionId);
+                _producer.ProduceMessage(new CreditRequestNack
+                {
+                    CreditId = message.CreditId,
+                    TransactionId = message.TransactionId
+                }, QueueName.Command);
                 return;
             }
 

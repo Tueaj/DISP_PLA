@@ -41,7 +41,7 @@ namespace CreditService.Services
                 {
                     if (change.Status == CreditChangeStatus.Performed)
                     {
-                        credit.Amount -= change.Amount;
+                        credit.Amount += change.Amount;
                         change.Status = CreditChangeStatus.RolledBack;
                     }
 
@@ -54,10 +54,10 @@ namespace CreditService.Services
                 }
 
                 _creditRepository.ReleaseCredit(credit.CreditId, message.TransactionId);
-                _producer.ProduceMessage(
-                    new RollbackCreditAck {TransactionId = message.TransactionId, CreditId = message.CreditId},
-                    QueueName.Command);
             }
+            _producer.ProduceMessage(
+                new RollbackCreditAck {TransactionId = message.TransactionId, CreditId = message.CreditId},
+                QueueName.Command);
         }
     }
 }

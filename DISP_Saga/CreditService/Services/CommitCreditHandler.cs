@@ -36,7 +36,7 @@ namespace CreditService.Services
 
             if (change is not {Status: CreditChangeStatus.Pending})
             {
-                if (change?.Status == CreditChangeStatus.Aborted)
+                if (change == null || change.Status == CreditChangeStatus.Aborted)
                 {
                     _producer.ProduceMessage(new CommitCreditNack
                         {
@@ -57,7 +57,7 @@ namespace CreditService.Services
                 return;
             }
 
-            credit.Amount += change.Amount;
+            credit.Amount -= change.Amount;
             change.Status = CreditChangeStatus.Performed;
 
             _creditRepository.UpdateCredit(credit, message.TransactionId);
