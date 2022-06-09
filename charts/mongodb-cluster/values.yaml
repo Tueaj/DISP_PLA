@@ -14,3 +14,5 @@ users:
         db: admin
       - name: userAdminAnyDatabase
         db: admin
+      - name: readWriteAnyDatabase
+        db: admin
