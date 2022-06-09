@@ -70,17 +70,6 @@ namespace CreditService.Services
                 return;
             }
             
-            if (credit.Amount < message.Amount)
-            {
-                _creditRepository.ReleaseCredit(message.CreditId, message.TransactionId);
-                _producer.ProduceMessage(new CreditRequestNack
-                {
-                    CreditId = message.CreditId,
-                    TransactionId = message.TransactionId
-                }, QueueName.Command);
-                return;
-            }
-
             var creditChange = new CreditChange
             {
                 Amount = message.Amount,
@@ -91,6 +80,17 @@ namespace CreditService.Services
             credit.ChangeLog.Add(creditChange);
 
             _creditRepository.UpdateCredit(credit, message.TransactionId);
+            
+            if (credit.Amount < message.Amount)
+            {
+                _creditRepository.ReleaseCredit(message.CreditId, message.TransactionId);
+                _producer.ProduceMessage(new CreditRequestNack
+                {
+                    CreditId = message.CreditId,
+                    TransactionId = message.TransactionId
+                }, QueueName.Command);
+                return;
+            }
 
             // Don't release lock on credit, we need to keep it until the commit is completed
 

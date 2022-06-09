@@ -71,17 +71,6 @@ namespace InventoryService.Services
                 return;
             }
             
-            if (item.Amount < message.Amount)
-            {
-                _inventoryRepository.ReleaseItem(message.ItemId, message.TransactionId);
-                _producer.ProduceMessage(new InventoryRequestNack()
-                {
-                    ItemId = message.ItemId,
-                    TransactionId = message.TransactionId
-                }, QueueName.Command);
-                return;
-            }
-            
             var itemChange = new ItemChange
             {
                 Amount = message.Amount,
@@ -92,6 +81,17 @@ namespace InventoryService.Services
             item.ChangeLog.Add(itemChange);
 
             _inventoryRepository.UpdateItem(item, message.TransactionId);
+            
+            if (item.Amount < message.Amount)
+            {
+                _inventoryRepository.ReleaseItem(message.ItemId, message.TransactionId);
+                _producer.ProduceMessage(new InventoryRequestNack()
+                {
+                    ItemId = message.ItemId,
+                    TransactionId = message.TransactionId
+                }, QueueName.Command);
+                return;
+            }
 
             // Don't release lock on item, we need to keep it until the commit is completed
 

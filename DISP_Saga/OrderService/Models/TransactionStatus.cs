@@ -6,6 +6,8 @@
         Requested,
         Committed,
         Aborted,
-        Rolledback
+        Abort,
+        Rolledback,
+        Rollback
     }
 }

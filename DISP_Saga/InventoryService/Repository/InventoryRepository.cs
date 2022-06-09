@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Data;
 using InventoryService.Models;
-using Messages;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;

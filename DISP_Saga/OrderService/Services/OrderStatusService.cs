@@ -65,12 +65,32 @@ namespace OrderService.Services
                     ItemsToShip = order.Inventory.ToDictionary(item => item.ItemId, item => item.Amount)
                 }, QueueName.Command);
             }
-            else if (order.Credit.Status == TransactionStatus.Aborted ||
-                     order.Inventory.Any(item => item.Status == TransactionStatus.Aborted))
+            else if (order.Credit.Status == TransactionStatus.Abort ||
+                     order.Inventory.Any(item => item.Status == TransactionStatus.Abort))
             {
                 _logger.LogInformation("Aborting order - transaction id {}", order.TransactionId);
 
-                _messageProducer.ProduceMessage(new RollbackCredit
+                _messageProducer.ProduceMessage(new AbortCredit()
+                {
+                    TransactionId = order.TransactionId,
+                    CreditId = order.Credit.CreditId
+                }, QueueName.Command);
+
+                foreach (var item in order.Inventory)
+                {
+                    _messageProducer.ProduceMessage(new AbortInventory()
+                    {
+                        TransactionId = order.TransactionId,
+                        ItemId = item.ItemId
+                    }, QueueName.Command);
+                }
+            }
+            else if (order.Credit.Status == TransactionStatus.Rollback ||
+                     order.Inventory.Any(item => item.Status == TransactionStatus.Rollback))
+            {
+                _logger.LogInformation("Aborting order - transaction id {}", order.TransactionId);
+
+                _messageProducer.ProduceMessage(new RollbackCredit()
                 {
                     TransactionId = order.TransactionId,
                     CreditId = order.Credit.CreditId

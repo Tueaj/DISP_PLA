@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using InventoryService.Models;
 using InventoryService.Repository;
-using InventoryService.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace InventoryService.Controllers

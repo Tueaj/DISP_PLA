@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using InventoryService.Models;
-using Messages;
 
 namespace InventoryService.Repository;
 

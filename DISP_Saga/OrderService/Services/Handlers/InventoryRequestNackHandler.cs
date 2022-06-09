@@ -31,7 +31,8 @@ namespace OrderService.Services.Handlers
 
             var inventoryItem = order.Inventory.First(i => i.ItemId == message.ItemId);
 
-            inventoryItem.Status = TransactionStatus.Aborted;
+            inventoryItem.Status = TransactionStatus.Abort;
+            order.Status = OrderStatus.FAILED;
 
             _orderRepository.UpdateOrder(order);
 

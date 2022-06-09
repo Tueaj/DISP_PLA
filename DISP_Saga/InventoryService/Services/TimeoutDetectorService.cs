@@ -29,7 +29,7 @@ namespace InventoryService.Services
             while (await timer.WaitForNextTickAsync(stoppingToken))
             {
                 var transactionId = Guid.NewGuid();
-                _logger.LogCritical("JAAALLLLLAAJJJAHHAHAHHAHAHAHAHAHA");
+                
                 var lockedItems = _repository.AcquireOldLocks(transactionId.ToString());
                 foreach (var lockedItem in lockedItems)
                 {

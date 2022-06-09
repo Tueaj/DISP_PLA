@@ -1,8 +1,8 @@
+using System.Text.Json.Serialization;
 using MessageHandling;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using OrderService.Models;
 using OrderService.Services;
 using OrderService.Services.Handlers;
@@ -21,6 +21,8 @@ builder.Services.AddMessageHandler<CreditRequestNackHandler>();
 builder.Services.AddMessageHandler<RollbackInventoryAckHandler>();
 builder.Services.AddMessageHandler<RollbackCreditAckHandler>();
 builder.Services.AddMessageHandler<InventoryRequestNackHandler>();
+builder.Services.AddMessageHandler<AbortInventoryAckHandler>();
+builder.Services.AddMessageHandler<AbortCreditAckHandler>();
 
 builder.Services.AddOptions<MongoConnectionSettings>()
     .Configure<IConfiguration>((options, configuration) =>
@@ -31,7 +33,13 @@ builder.Services.AddOptions<MongoConnectionSettings>()
 // Add services to the container.
 
 builder.Services.AddControllers()
-    .AddJsonOptions(configure => { configure.JsonSerializerOptions.IncludeFields = true; });
+    .AddJsonOptions(configure =>
+    {
+        configure.JsonSerializerOptions.IncludeFields = true;
+        
+        var enumConverter = new JsonStringEnumConverter();
+        configure.JsonSerializerOptions.Converters.Add(enumConverter);
+    });
 
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

@@ -28,7 +28,8 @@ namespace OrderService.Services.Handlers
 
             var order = _orderRepository.GetOrderById(message.TransactionId);
 
-            order.Credit.Status = TransactionStatus.Aborted;
+            order.Credit.Status = TransactionStatus.Abort;
+            order.Status = OrderStatus.FAILED;
 
             _orderRepository.UpdateOrder(order);
 

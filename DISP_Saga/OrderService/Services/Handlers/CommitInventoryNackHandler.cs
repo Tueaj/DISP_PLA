@@ -37,7 +37,8 @@ namespace OrderService.Services.Handlers
                 return;
             }
 
-            nackedItem.Status = TransactionStatus.Aborted;
+            nackedItem.Status = TransactionStatus.Rollback;
+            order.Status = OrderStatus.FAILED;
 
             _orderRepository.UpdateOrder(order);
 
