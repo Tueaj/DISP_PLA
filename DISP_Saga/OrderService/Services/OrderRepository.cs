@@ -8,7 +8,7 @@ namespace OrderService.Services
     public class OrderRepository : IOrderRepository
     {
         private readonly IMongoCollection<Order> _orderCollection;
-    
+
         public OrderRepository(IOptions<MongoConnectionSettings> settings)
         {
             var mongoClient = new MongoClient($"mongodb://{settings.Value.HostName}:{settings.Value.Port}");
@@ -19,18 +19,18 @@ namespace OrderService.Services
 
         public void CreateOrder(Order order)
         {
-            order.OrderId = Guid.NewGuid().ToString();
+            order.TransactionId = Guid.NewGuid().ToString();
             _orderCollection.InsertOne(order);
         }
 
         public Order GetOrderById(string id)
         {
-            return _orderCollection.FindSync(_ => _.OrderId == id).First();
+            return _orderCollection.FindSync(_ => _.TransactionId == id).First();
         }
 
         public void UpdateOrder(Order order)
         {
-            _orderCollection.FindOneAndReplace(_ => _.OrderId == order.OrderId, order);
+            _orderCollection.FindOneAndReplace(_ => _.TransactionId == order.TransactionId, order);
         }
     }
 }

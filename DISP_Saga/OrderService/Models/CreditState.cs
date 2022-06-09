@@ -5,7 +5,7 @@
         public double Amount;
 
         public string CreditId;
-        
+
         public TransactionStatus Status = TransactionStatus.Pending;
     }
 }

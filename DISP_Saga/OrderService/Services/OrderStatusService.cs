@@ -40,16 +40,16 @@ namespace OrderService.Services
 
                 _messageProducer.ProduceMessage(new CommitCredit
                 {
-                    TransactionId = order.OrderId,
+                    TransactionId = order.TransactionId,
                     CreditId = order.Credit.CreditId
                 }, QueueName.Command);
                 foreach (var inventoryState in order.Inventory)
-                {                
+                {
                     _logger.LogInformation("Starting commit - Item with id {}", inventoryState.ItemId);
 
                     _messageProducer.ProduceMessage(new CommitInventory
                     {
-                        TransactionId = order.OrderId,
+                        TransactionId = order.TransactionId,
                         ItemId = inventoryState.ItemId
                     }, QueueName.Command);
                 }
@@ -57,13 +57,33 @@ namespace OrderService.Services
             else if (order.Credit.Status == TransactionStatus.Committed &&
                      order.Inventory.All(item => item.Status == TransactionStatus.Committed))
             {
-                _logger.LogInformation("Ship order...");
+                _logger.LogInformation("Ship order {}...", order.TransactionId);
 
                 _messageProducer.ProduceMessage(new ShipOrder
                 {
-                    OrderId = order.OrderId,
+                    OrderId = order.TransactionId,
                     ItemsToShip = order.Inventory.ToDictionary(item => item.ItemId, item => item.Amount)
                 }, QueueName.Command);
+            }
+            else if (order.Credit.Status == TransactionStatus.Aborted ||
+                     order.Inventory.Any(item => item.Status == TransactionStatus.Aborted))
+            {
+                _logger.LogInformation("Aborting order - transaction id {}", order.TransactionId);
+
+                _messageProducer.ProduceMessage(new RollbackCredit
+                {
+                    TransactionId = order.TransactionId,
+                    CreditId = order.Credit.CreditId
+                }, QueueName.Command);
+
+                foreach (var item in order.Inventory)
+                {
+                    _messageProducer.ProduceMessage(new RollbackInventory()
+                    {
+                        TransactionId = order.TransactionId,
+                        ItemId = item.ItemId
+                    }, QueueName.Command);
+                }
             }
         }
 

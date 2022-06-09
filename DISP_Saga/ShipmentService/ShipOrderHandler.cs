@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using MessageHandling.Abstractions;
 using Messages;
 using Microsoft.Extensions.Logging;

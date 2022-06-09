@@ -1,10 +1,10 @@
 ﻿using MessageHandling.Abstractions;
 using Messages;
-using OrderService.Models;
 using Microsoft.Extensions.Logging;
 using MongoDB.Bson;
+using OrderService.Models;
 
-namespace OrderService.Services
+namespace OrderService.Services.Handlers
 {
     public class CommitCreditAckHandler : CommandHandler<CommitCreditAck>
     {
@@ -35,7 +35,7 @@ namespace OrderService.Services
 
             _orderRepository.UpdateOrder(order);
 
-            _orderStatusService.OrderUpdated(order.OrderId);
+            _orderStatusService.OrderUpdated(order.TransactionId);
         }
     }
 }

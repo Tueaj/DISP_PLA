@@ -5,16 +5,16 @@ using Microsoft.Extensions.Logging;
 using MongoDB.Bson;
 using OrderService.Models;
 
-namespace OrderService.Services
+namespace OrderService.Services.Handlers
 {
-    public class CommitInventoryAckHandler : CommandHandler<CommitInventoryAck>
+    public class InventoryRequestAckHandler : CommandHandler<InventoryRequestAck>
     {
-        private readonly ILogger<CommitInventoryAckHandler> _logger;
+        private readonly ILogger<InventoryRequestAckHandler> _logger;
         private readonly IOrderRepository _orderRepository;
         private readonly OrderStatusService _orderStatusService;
 
-        public CommitInventoryAckHandler(
-            ILogger<CommitInventoryAckHandler> logger,
+        public InventoryRequestAckHandler(
+            ILogger<InventoryRequestAckHandler> logger,
             IOrderRepository orderRepository,
             OrderStatusService orderStatusService)
         {
@@ -23,7 +23,7 @@ namespace OrderService.Services
             _orderStatusService = orderStatusService;
         }
 
-        public override void Handle(CommitInventoryAck message)
+        public override void Handle(InventoryRequestAck message)
         {
             _logger.LogInformation(message.ToJson());
 
@@ -31,14 +31,14 @@ namespace OrderService.Services
 
             var inventoryItem = order.Inventory.First(i => i.ItemId == message.ItemId);
 
-            if (inventoryItem.Status == TransactionStatus.Requested)
+            if (inventoryItem.Status == TransactionStatus.Pending)
             {
-                inventoryItem.Status = TransactionStatus.Committed;
+                inventoryItem.Status = TransactionStatus.Requested;
             }
 
             _orderRepository.UpdateOrder(order);
 
-            _orderStatusService.OrderUpdated(order.OrderId);
+            _orderStatusService.OrderUpdated(order.TransactionId);
         }
     }
 }

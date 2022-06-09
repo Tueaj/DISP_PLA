@@ -3,7 +3,7 @@
 namespace OrderService.Services
 {
     public interface IOrderRepository
-    { 
+    {
         void CreateOrder(Order order);
 
         Order GetOrderById(string id);

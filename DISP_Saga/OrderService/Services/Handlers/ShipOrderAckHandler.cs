@@ -2,7 +2,7 @@
 using Messages;
 using OrderService.Models;
 
-namespace OrderService.Services
+namespace OrderService.Services.Handlers
 {
     public class ShipOrderAckHandler : CommandHandler<ShipOrderAck>
     {

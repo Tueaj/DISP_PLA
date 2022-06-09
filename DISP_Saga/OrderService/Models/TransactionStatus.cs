@@ -5,5 +5,7 @@
         Pending,
         Requested,
         Committed,
+        Aborted,
+        Rolledback
     }
 }

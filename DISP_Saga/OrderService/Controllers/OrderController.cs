@@ -42,21 +42,21 @@ namespace OrderService.Controllers
 
             _messageProducer.ProduceMessage(new CreditRequest
             {
-                TransactionId = order.OrderId,
+                TransactionId = order.TransactionId,
                 CreditId = order.Credit.CreditId,
                 Amount = order.Credit.Amount
             }, QueueName.Command);
-            
+
             foreach (var inventoryState in order.Inventory)
             {
                 _messageProducer.ProduceMessage(new InventoryRequest
                 {
-                    TransactionId = order.OrderId,
-                    ItemId =  inventoryState.ItemId,
+                    TransactionId = order.TransactionId,
+                    ItemId = inventoryState.ItemId,
                     Amount = inventoryState.Amount,
                 }, QueueName.Command);
             }
-            
+
             return Created("Order creation begun", createOrderRequest);
         }
     }
