@@ -42,7 +42,7 @@ namespace OrderService.Controllers
 
             _messageProducer.ProduceMessage(new CreditRequest
             {
-                TransactionId = order.OrderId,
+                TransactionId = order.TransactionId,
                 CreditId = order.Credit.CreditId,
                 Amount = order.Credit.Amount
             }, QueueName.Command);
@@ -51,7 +51,7 @@ namespace OrderService.Controllers
             {
                 _messageProducer.ProduceMessage(new InventoryRequest
                 {
-                    TransactionId = order.OrderId,
+                    TransactionId = order.TransactionId,
                     ItemId =  inventoryState.ItemId,
                     Amount = inventoryState.Amount,
                 }, QueueName.Command);

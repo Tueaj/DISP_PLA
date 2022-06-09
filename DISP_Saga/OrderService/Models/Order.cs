@@ -6,7 +6,7 @@ namespace OrderService.Models
     public class Order
     {
         [BsonId]
-        public string OrderId;
+        public string TransactionId;
 
         public CreditState Credit;
 

@@ -38,7 +38,7 @@ namespace OrderService.Services
 
             _orderRepository.UpdateOrder(order);
 
-            _orderStatusService.OrderUpdated(order.OrderId);
+            _orderStatusService.OrderUpdated(order.TransactionId);
         }
     }
 }

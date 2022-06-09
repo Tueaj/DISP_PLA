@@ -14,6 +14,12 @@ builder.Services.AddMessageHandler<InventoryRequestAckHandler>();
 builder.Services.AddMessageHandler<ShipOrderAckHandler>();
 builder.Services.AddMessageHandler<CommitCreditAckHandler>();
 builder.Services.AddMessageHandler<CommitInventoryAckHandler>();
+builder.Services.AddMessageHandler<CommitCreditNackHandler>();
+builder.Services.AddMessageHandler<CommitInventoryNackHandler>();
+builder.Services.AddMessageHandler<CreditRequestNackHandler>();
+builder.Services.AddMessageHandler<RollbackInventoryAckHandler>();
+builder.Services.AddMessageHandler<RollbackCreditAckHandler>();
+builder.Services.AddMessageHandler<InventoryRequestNackHandler>();
 
 builder.Services.AddOptions<MongoConnectionSettings>()
     .Configure<IConfiguration>((options, configuration) =>

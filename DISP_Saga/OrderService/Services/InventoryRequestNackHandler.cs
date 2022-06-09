@@ -7,14 +7,14 @@ using OrderService.Models;
 
 namespace OrderService.Services
 {
-    public class CommitInventoryAckHandler : CommandHandler<CommitInventoryAck>
+    public class InventoryRequestNackHandler : CommandHandler<InventoryRequestNack>
     {
-        private readonly ILogger<CommitInventoryAckHandler> _logger;
+        private readonly ILogger<InventoryRequestNackHandler> _logger;
         private readonly IOrderRepository _orderRepository;
         private readonly OrderStatusService _orderStatusService;
 
-        public CommitInventoryAckHandler(
-            ILogger<CommitInventoryAckHandler> logger,
+        public InventoryRequestNackHandler(
+            ILogger<InventoryRequestNackHandler> logger,
             IOrderRepository orderRepository,
             OrderStatusService orderStatusService)
         {
@@ -23,7 +23,7 @@ namespace OrderService.Services
             _orderStatusService = orderStatusService;
         }
 
-        public override void Handle(CommitInventoryAck message)
+        public override void Handle(InventoryRequestNack message)
         {
             _logger.LogInformation(message.ToJson());
 
@@ -31,11 +31,8 @@ namespace OrderService.Services
 
             var inventoryItem = order.Inventory.First(i => i.ItemId == message.ItemId);
 
-            if (inventoryItem.Status == TransactionStatus.Requested)
-            {
-                inventoryItem.Status = TransactionStatus.Committed;
-            }
-
+            inventoryItem.Status = TransactionStatus.Aborted;
+            
             _orderRepository.UpdateOrder(order);
 
             _orderStatusService.OrderUpdated(order.TransactionId);
