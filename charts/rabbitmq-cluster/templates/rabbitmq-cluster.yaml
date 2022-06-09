@@ -1,0 +1,17 @@
+{{- $fullName := include "rabbitmq-cluster.fullname" . -}}
+apiVersion: rabbitmq.com/v1beta1
+kind: RabbitmqCluster
+metadata:
+  name: {{ $fullName }}
+spec:
+  {{- if .Values.management.enabled }}
+  image: rabbitmq:3.9.7-management
+  {{- end }}
+  replicas: {{ .Values.replicaCount }}
+  rabbitmq:
+    additionalConfig: |
+        {{- if .Values.management.enabled }}
+        management.path_prefix = {{ .Values.management.path }}
+        {{- end }}
+        default_user={{ .Values.credentials.default.username }}
+        default_pass={{ .Values.credentials.default.password }}

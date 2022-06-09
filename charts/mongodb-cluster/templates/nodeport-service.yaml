@@ -1,0 +1,15 @@
+{{- $fullName := include "mongodb-cluster.fullname" . -}}
+kind: Service
+apiVersion: v1
+metadata:
+  name: external-mongo-service-0
+spec:
+  type: NodePort
+  selector:
+    app: {{ $fullName }}-svc
+    statefulset.kubernetes.io/pod-name: {{ $fullName }}-0
+  ports:
+    - protocol: TCP
+      nodePort: {{ .Values.accessPort }}
+      port: {{ .Values.accessPort }}
+      targetPort: 27017

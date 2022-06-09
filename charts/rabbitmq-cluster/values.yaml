@@ -1,0 +1,14 @@
+replicaCount: 2
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+credentials:
+  default:
+    username: guest
+    password: guest
+
+management:
+  enabled: true
+  path: /rabbitmq-management
