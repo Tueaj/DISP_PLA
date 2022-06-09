@@ -44,8 +44,6 @@ services:
       MessageHandling__HostName: rabbit
     ports:
       - "8004:80"
-    expose:
-      - "8004"
 
   rabbit:
     image: rabbitmq:management
