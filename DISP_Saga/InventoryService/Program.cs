@@ -1,4 +1,5 @@
 using InventoryService.Models;
+using InventoryService.Repository;
 using InventoryService.Services;
 using MessageHandling;
 using Microsoft.AspNetCore.Builder;
@@ -11,6 +12,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddMessageHandling();
 builder.Services.AddMessageHandler<InventoryRequestHandler>();
 builder.Services.AddMessageHandler<CommitInventoryHandler>();
+builder.Services.AddMessageHandler<RollbackInventoryHandler>();
 
 builder.Services.AddOptions<MongoConnectionSettings>()
     .Configure<IConfiguration>((options, configuration) =>
@@ -30,7 +32,8 @@ builder.Services.AddControllers()
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSingleton<IInventoryRepository, InventoryRepository>();
-builder.Services.AddSingleton<IReservationRepository, ReservationRepository>();
+
+builder.Services.AddHostedService<TimeoutDetectorService>();
 
 var app = builder.Build();
 

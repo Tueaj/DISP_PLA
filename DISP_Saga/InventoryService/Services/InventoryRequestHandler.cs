@@ -1,5 +1,6 @@
-﻿using System;
+﻿using System.Linq;
 using InventoryService.Models;
+using InventoryService.Repository;
 using MessageHandling;
 using MessageHandling.Abstractions;
 using Messages;
@@ -26,23 +27,77 @@ namespace InventoryService.Services
         {
             _logger.LogInformation(message.ToJson());
 
-            Item? item = _inventoryRepository.GetItemById(message.ItemId);
-            
-            if (item.PendingReservation is not null)
+            if (!_inventoryRepository.ItemExists(message.ItemId))
             {
-                throw new Exception();
-            }
-
-            if (item == null || item.Amount < message.Amount)
-            {
-                //produce message for abort
+                _producer.ProduceMessage(new InventoryRequestNack()
+                {
+                    ItemId = message.ItemId,
+                    TransactionId = message.TransactionId
+                }, QueueName.Command);
                 return;
             }
             
+            // Ignore the constraint exception - If we fail to acquire the lock, we should just throw, re-queue,
+            // and try again.
+            Item item = _inventoryRepository.AcquireItem(message.ItemId, message.TransactionId);
             
-            _inventoryRepository.SetReservationOnItem(message);
+            var existingChange = item.ChangeLog.FirstOrDefault(log => log.TransactionId == message.TransactionId);
             
-            _producer.ProduceMessage(new InventoryRequestAck {TransactionId = message.TransactionId, ItemId = message.ItemId}, QueueName.Command);
+            if (existingChange != default)
+            {
+                //Transaction has taken item, but never completes and is therefore aborted by TimeoutDetector
+                if (existingChange.Status == ItemChangeStatus.Aborted)
+                {
+                    _producer.ProduceMessage(new InventoryRequestNack()
+                    {
+                        ItemId = message.ItemId,
+                        TransactionId = message.TransactionId
+                    }, QueueName.Command);
+                }
+                else
+                {
+                    //Transaction has been rolled back, which means it has been committed, so send ACK
+                    _producer.ProduceMessage(
+                        new InventoryRequestAck {TransactionId = message.TransactionId, ItemId = message.ItemId},
+                        QueueName.Command);
+                }
+
+                //If transaction is pending, don't do anything, else release lock on item.
+                if (existingChange.Status != ItemChangeStatus.Pending)
+                {
+                    _inventoryRepository.ReleaseItem(message.ItemId, message.TransactionId);
+                }
+
+                return;
+            }
+            
+            if (item.Amount < message.Amount)
+            {
+                _inventoryRepository.ReleaseItem(message.ItemId, message.TransactionId);
+                _producer.ProduceMessage(new InventoryRequestNack()
+                {
+                    ItemId = message.ItemId,
+                    TransactionId = message.TransactionId
+                }, QueueName.Command);
+                return;
+            }
+            
+            var itemChange = new ItemChange
+            {
+                Amount = message.Amount,
+                Status = ItemChangeStatus.Pending,
+                TransactionId = message.TransactionId
+            };
+
+            item.ChangeLog.Add(itemChange);
+
+            _inventoryRepository.UpdateItem(item, message.TransactionId);
+
+            // Don't release lock on item, we need to keep it until the commit is completed
+
+            _producer.ProduceMessage(
+                new InventoryRequestAck {TransactionId = message.TransactionId, ItemId = message.ItemId},
+                QueueName.Command);
         }
     }
 }

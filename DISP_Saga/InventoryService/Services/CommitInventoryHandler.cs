@@ -1,4 +1,5 @@
 ﻿using InventoryService.Models;
+using InventoryService.Repository;
 using MessageHandling;
 using MessageHandling.Abstractions;
 using Messages;
@@ -25,14 +26,48 @@ namespace InventoryService.Services
         {
             _logger.LogInformation(message.ToJson());
 
-            Item item = _inventoryRepository.GetItemById(message.ItemId);
-        
-            item.Amount -= item.PendingReservation.Amount;
-            item.PendingReservation = null;
-        
-            _inventoryRepository.ReplaceItem(item);
+            // Ignore the constraint exception - If we fail to acquire the lock, we should just throw, re-queue,
+            // and try again.
+            Item item = _inventoryRepository.AcquireItem(message.ItemId, message.TransactionId);
 
-            _producer.ProduceMessage(new CommitInventoryAck() {TransactionId = message.TransactionId, ItemId = message.ItemId}, QueueName.Command);
+            var change = item.ChangeLog.Find(change => change.TransactionId == message.TransactionId);
+
+            //Not sunshine
+            if (change is not {Status: ItemChangeStatus.Pending})
+            {
+                //If transaction has been aborted, send NACK
+                if (change == null || change.Status == ItemChangeStatus.Aborted)
+                {
+                    _producer.ProduceMessage(new CommitInventoryNack
+                        {
+                            TransactionId = message.TransactionId,
+                            ItemId = message.ItemId
+                        },
+                        QueueName.Command);
+                }
+                else
+                {
+                    //If transaction has been rolled back, it has also been committed. Send ACK
+                    _producer.ProduceMessage(
+                        new CommitInventoryAck {TransactionId = message.TransactionId, ItemId = message.ItemId},
+                        QueueName.Command);
+                }
+
+                _inventoryRepository.ReleaseItem(message.ItemId, message.TransactionId);
+
+                return;
+            }
+            
+            //Sunshine
+            item.Amount -= change.Amount;
+            change.Status = ItemChangeStatus.Performed;
+
+            _inventoryRepository.UpdateItem(item, message.TransactionId);
+            _inventoryRepository.ReleaseItem(message.ItemId, message.TransactionId);
+
+            _producer.ProduceMessage(
+                new CommitInventoryAck {TransactionId = message.TransactionId, ItemId = message.ItemId},
+                QueueName.Command);
         }
     }
 }

@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using InventoryService.Models;
+using InventoryService.Repository;
 using InventoryService.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -47,7 +49,7 @@ namespace InventoryService.Controllers
             else
             {
                 item.Amount = amount;
-                _inventoryRepository.ReplaceItem(item);
+                _inventoryRepository.UpdateItem(item, Guid.NewGuid().ToString());
             }
 
             return Ok();

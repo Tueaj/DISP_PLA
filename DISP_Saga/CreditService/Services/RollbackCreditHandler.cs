@@ -11,12 +11,12 @@ namespace CreditService.Services
 {
     public class RollbackCreditHandler : CommandHandler<RollbackCredit>
     {
-        private readonly ILogger<RollbackCredit> _logger;
+        private readonly ILogger<RollbackCreditHandler> _logger;
         private readonly IMessageProducer _producer;
         private readonly ICreditRepository _creditRepository;
 
         public RollbackCreditHandler(
-            ILogger<RollbackCredit> logger,
+            ILogger<RollbackCreditHandler> logger,
             IMessageProducer producer,
             ICreditRepository creditRepository)
         {
