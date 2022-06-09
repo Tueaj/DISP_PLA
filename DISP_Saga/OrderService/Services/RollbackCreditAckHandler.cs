@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using MessageHandling.Abstractions;
+﻿using MessageHandling.Abstractions;
 using Messages;
 using Microsoft.Extensions.Logging;
 using MongoDB.Bson;
