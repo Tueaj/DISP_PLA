@@ -2,9 +2,8 @@
 {
     public enum TransactionStatus
     {
-        PENDING,
-        REQUESTED,
-        COMMITTED,
-        
+        Pending,
+        Requested,
+        Committed,
     }
 }

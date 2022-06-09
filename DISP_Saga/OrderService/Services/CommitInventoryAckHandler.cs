@@ -31,9 +31,9 @@ namespace OrderService.Services
 
             var inventoryItem = order.Inventory.First(i => i.ItemId == message.ItemId);
 
-            if (inventoryItem.Status == TransactionStatus.REQUESTED)
+            if (inventoryItem.Status == TransactionStatus.Requested)
             {
-                inventoryItem.Status = TransactionStatus.COMMITTED;
+                inventoryItem.Status = TransactionStatus.Committed;
             }
 
             _orderRepository.UpdateOrder(order);

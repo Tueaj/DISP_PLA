@@ -28,9 +28,9 @@ namespace OrderService.Services
 
             var order = _orderRepository.GetOrderById(message.TransactionId);
 
-            if (order.Credit.Status == TransactionStatus.REQUESTED)
+            if (order.Credit.Status == TransactionStatus.Requested)
             {
-                order.Credit.Status = TransactionStatus.COMMITTED;
+                order.Credit.Status = TransactionStatus.Committed;
             }
 
             _orderRepository.UpdateOrder(order);

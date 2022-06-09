@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using MessageHandling;
 using MessageHandling.Abstractions;
@@ -34,8 +33,8 @@ namespace OrderService.Services
             _logger.LogInformation("OrderStatusUpdated triggered");
             var order = _repository.GetOrderById(orderStatusUpdatedEventArgs.OrderId);
 
-            if (order.Credit.Status == TransactionStatus.REQUESTED &&
-                order.Inventory.All(item => item.Status == TransactionStatus.REQUESTED))
+            if (order.Credit.Status == TransactionStatus.Requested &&
+                order.Inventory.All(item => item.Status == TransactionStatus.Requested))
             {
                 _logger.LogInformation("Starting commit - Credit with id {}", order.Credit.CreditId);
 
@@ -55,8 +54,8 @@ namespace OrderService.Services
                     }, QueueName.Command);
                 }
             }
-            else if (order.Credit.Status == TransactionStatus.COMMITTED &&
-                     order.Inventory.All(item => item.Status == TransactionStatus.COMMITTED))
+            else if (order.Credit.Status == TransactionStatus.Committed &&
+                     order.Inventory.All(item => item.Status == TransactionStatus.Committed))
             {
                 _logger.LogInformation("Ship order...");
 

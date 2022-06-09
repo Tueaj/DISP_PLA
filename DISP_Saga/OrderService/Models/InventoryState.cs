@@ -6,6 +6,6 @@
 
         public string ItemId;
         
-        public TransactionStatus Status = TransactionStatus.PENDING;
+        public TransactionStatus Status = TransactionStatus.Pending;
     }
 }

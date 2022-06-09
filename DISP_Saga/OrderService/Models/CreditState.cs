@@ -6,6 +6,6 @@
 
         public string CreditId;
         
-        public TransactionStatus Status = TransactionStatus.PENDING;
+        public TransactionStatus Status = TransactionStatus.Pending;
     }
 }
