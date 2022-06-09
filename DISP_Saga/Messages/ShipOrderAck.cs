@@ -4,6 +4,6 @@ namespace Messages
 {
     public class ShipOrderAck : IMessage
     {
-        public string OrderId;
+        public string TransactionId;
     }
 }

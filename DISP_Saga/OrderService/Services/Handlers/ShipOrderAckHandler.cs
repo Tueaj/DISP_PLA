@@ -7,19 +7,16 @@ namespace OrderService.Services.Handlers
     public class ShipOrderAckHandler : CommandHandler<ShipOrderAck>
     {
         private readonly IOrderRepository _orderRepository;
-        private readonly OrderStatusService _orderStatusService;
 
         public ShipOrderAckHandler(
-            IOrderRepository orderRepository,
-            OrderStatusService orderStatusService)
+            IOrderRepository orderRepository)
         {
             _orderRepository = orderRepository;
-            _orderStatusService = orderStatusService;
         }
 
         public override void Handle(ShipOrderAck message)
         {
-            var order = _orderRepository.GetOrderById(message.OrderId);
+            var order = _orderRepository.GetOrderById(message.TransactionId);
 
             order.Status = OrderStatus.COMPLETED;
 

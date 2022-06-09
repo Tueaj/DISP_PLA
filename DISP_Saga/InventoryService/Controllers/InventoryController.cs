@@ -44,7 +44,7 @@ namespace InventoryService.Controllers
 
             if (item == null)
             {
-                _inventoryRepository.CreateItem(new Item {Amount = amount, ItemId = id});
+                _inventoryRepository.CreateItem(new Item {Amount = amount, ItemId = id, ChangeLog = new List<ItemChange>(), Lock = null});
             }
             else
             {

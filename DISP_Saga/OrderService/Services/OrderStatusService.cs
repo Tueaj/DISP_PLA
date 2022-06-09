@@ -61,7 +61,7 @@ namespace OrderService.Services
 
                 _messageProducer.ProduceMessage(new ShipOrder
                 {
-                    OrderId = order.TransactionId,
+                    TransactionId = order.TransactionId,
                     ItemsToShip = order.Inventory.ToDictionary(item => item.ItemId, item => item.Amount)
                 }, QueueName.Command);
             }
