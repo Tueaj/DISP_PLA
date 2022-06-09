@@ -9,6 +9,8 @@ services:
       MongoConnection__HostName: mongo
     ports:
       - "8001:80"
+    expose:
+      - "8001"
 
   inventoryservice:
     build:
@@ -19,6 +21,8 @@ services:
       MongoConnection__HostName: mongo
     ports:
       - "8002:80"
+    expose:
+      - "8002"
 
   orderservice:
     build:
@@ -29,6 +33,8 @@ services:
       MongoConnection__HostName: mongo
     ports:
       - "8003:80"
+    expose:
+      - "8003"
 
   shipmentservice:
     build:
@@ -38,6 +44,8 @@ services:
       MessageHandling__HostName: rabbit
     ports:
       - "8004:80"
+    expose:
+      - "8004"
 
   rabbit:
     image: rabbitmq:management
