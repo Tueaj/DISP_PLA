@@ -26,7 +26,7 @@ namespace OrderService.Services.Handlers
         public override void Handle(CommitInventoryNack message)
         {
             _logger.LogInformation(message.ToJson());
-            
+
             var order = _orderRepository.GetOrderById(message.TransactionId);
 
             var nackedItem = order.Inventory.FirstOrDefault(item => item.ItemId == message.ItemId);
@@ -36,11 +36,11 @@ namespace OrderService.Services.Handlers
                 _logger.LogError("Inventory nack on item that does not exits on order");
                 return;
             }
-            
+
             nackedItem.Status = TransactionStatus.Aborted;
-            
+
             _orderRepository.UpdateOrder(order);
-            
+
             _orderStatusService.OrderUpdated(order.TransactionId);
         }
     }

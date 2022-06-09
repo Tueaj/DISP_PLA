@@ -44,7 +44,7 @@ namespace OrderService.Services
                     CreditId = order.Credit.CreditId
                 }, QueueName.Command);
                 foreach (var inventoryState in order.Inventory)
-                {                
+                {
                     _logger.LogInformation("Starting commit - Item with id {}", inventoryState.ItemId);
 
                     _messageProducer.ProduceMessage(new CommitInventory
@@ -65,10 +65,11 @@ namespace OrderService.Services
                     ItemsToShip = order.Inventory.ToDictionary(item => item.ItemId, item => item.Amount)
                 }, QueueName.Command);
             }
-            else if (order.Credit.Status == TransactionStatus.Aborted || order.Inventory.Any(item => item.Status == TransactionStatus.Aborted))
+            else if (order.Credit.Status == TransactionStatus.Aborted ||
+                     order.Inventory.Any(item => item.Status == TransactionStatus.Aborted))
             {
                 _logger.LogInformation("Aborting order - transaction id {}", order.TransactionId);
-                
+
                 _messageProducer.ProduceMessage(new RollbackCredit
                 {
                     TransactionId = order.TransactionId,

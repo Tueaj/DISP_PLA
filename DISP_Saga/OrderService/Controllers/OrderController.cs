@@ -46,17 +46,17 @@ namespace OrderService.Controllers
                 CreditId = order.Credit.CreditId,
                 Amount = order.Credit.Amount
             }, QueueName.Command);
-            
+
             foreach (var inventoryState in order.Inventory)
             {
                 _messageProducer.ProduceMessage(new InventoryRequest
                 {
                     TransactionId = order.TransactionId,
-                    ItemId =  inventoryState.ItemId,
+                    ItemId = inventoryState.ItemId,
                     Amount = inventoryState.Amount,
                 }, QueueName.Command);
             }
-            
+
             return Created("Order creation begun", createOrderRequest);
         }
     }

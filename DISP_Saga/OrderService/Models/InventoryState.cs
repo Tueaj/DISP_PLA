@@ -5,7 +5,7 @@
         public int Amount;
 
         public string ItemId;
-        
+
         public TransactionStatus Status = TransactionStatus.Pending;
     }
 }

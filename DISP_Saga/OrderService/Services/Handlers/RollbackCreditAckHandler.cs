@@ -22,11 +22,11 @@ namespace OrderService.Services.Handlers
         public override void Handle(RollbackCreditAck message)
         {
             _logger.LogInformation(message.ToJson());
-            
+
             var order = _orderRepository.GetOrderById(message.TransactionId);
-            
+
             order.Credit.Status = TransactionStatus.Rolledback;
-            
+
             _orderRepository.UpdateOrder(order);
         }
     }

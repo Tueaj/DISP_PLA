@@ -32,7 +32,7 @@ namespace OrderService.Services.Handlers
             var inventoryItem = order.Inventory.First(i => i.ItemId == message.ItemId);
 
             inventoryItem.Status = TransactionStatus.Aborted;
-            
+
             _orderRepository.UpdateOrder(order);
 
             _orderStatusService.OrderUpdated(order.TransactionId);

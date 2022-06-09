@@ -23,13 +23,13 @@ namespace OrderService.Services.Handlers
         public override void Handle(RollbackInventoryAck message)
         {
             _logger.LogInformation(message.ToJson());
-            
+
             var order = _orderRepository.GetOrderById(message.TransactionId);
 
             var inventoryItem = order.Inventory.First(i => i.ItemId == message.ItemId);
 
             inventoryItem.Status = TransactionStatus.Rolledback;
-            
+
             _orderRepository.UpdateOrder(order);
         }
     }

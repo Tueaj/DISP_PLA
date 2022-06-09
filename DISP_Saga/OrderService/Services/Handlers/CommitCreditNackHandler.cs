@@ -25,13 +25,13 @@ namespace OrderService.Services.Handlers
         public override void Handle(CommitCreditNack message)
         {
             _logger.LogInformation(message.ToJson());
-            
+
             var order = _orderRepository.GetOrderById(message.TransactionId);
-            
+
             order.Credit.Status = TransactionStatus.Aborted;
-            
+
             _orderRepository.UpdateOrder(order);
-            
+
             _orderStatusService.OrderUpdated(order.TransactionId);
         }
     }

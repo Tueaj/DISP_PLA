@@ -8,7 +8,7 @@ namespace OrderService.Services
     public class OrderRepository : IOrderRepository
     {
         private readonly IMongoCollection<Order> _orderCollection;
-    
+
         public OrderRepository(IOptions<MongoConnectionSettings> settings)
         {
             var mongoClient = new MongoClient($"mongodb://{settings.Value.HostName}:{settings.Value.Port}");
