@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using MessageHandling;
 using MessageHandling.Abstractions;
@@ -19,6 +20,12 @@ namespace OrderService.Controllers
         {
             _orderRepository = orderRepository;
             _messageProducer = messageProducer;
+        }
+
+        [HttpGet]
+        public IEnumerable<Order> GetOrders()
+        {
+            return _orderRepository.GetAllOrders();
         }
 
         [HttpPost("")]

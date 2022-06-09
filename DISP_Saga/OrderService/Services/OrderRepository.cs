@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using OrderService.Models;
@@ -26,6 +27,11 @@ namespace OrderService.Services
         public Order GetOrderById(string id)
         {
             return _orderCollection.FindSync(_ => _.TransactionId == id).First();
+        }
+
+        public IEnumerable<Order> GetAllOrders()
+        {
+            return _orderCollection.Find(_ => true).ToList();
         }
 
         public void UpdateOrder(Order order)

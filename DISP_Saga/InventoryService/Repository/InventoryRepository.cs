@@ -57,7 +57,7 @@ public class InventoryRepository : IInventoryRepository
 
         if (updated == null)
         {
-            throw new ConstraintException($"Did not hold required lock for credit with id {item.ItemId}");
+            throw new ConstraintException($"Did not hold required lock for Inventory with id {item.ItemId}");
         }
     }
 
@@ -73,11 +73,12 @@ public class InventoryRepository : IInventoryRepository
         }
         catch (MongoException e) when (e is MongoWriteConcernException or MongoWriteException)
         {
+            _logger.LogError(e.Message);
         }
 
         if (item == null)
         {
-            throw new ConstraintException($"Could not acquire lock for credit with ID {itemId}");
+            throw new ConstraintException($"Could not acquire lock for Inventory with ID {itemId}");
         }
 
         return item;
@@ -98,7 +99,7 @@ public class InventoryRepository : IInventoryRepository
 
         if (item == null)
         {
-            throw new ConstraintException($"Could not release lock for credit with ID {itemId}");
+            throw new ConstraintException($"Could not release lock for Inventory with ID {itemId}");
         }
     }
 
