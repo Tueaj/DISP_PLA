@@ -1,0 +1,77 @@
+@startuml
+skinparam SequenceMessageAlignment center
+actor Client
+
+participant OrderService
+participant OrderDatabase
+
+participant MessageQueue
+
+participant CreditService
+participant CreditDatabase
+
+participant InventoryService
+participant InventoryDatabase
+
+participant ShipmentService
+
+Client -> OrderService: Create order
+activate OrderService
+OrderService -> OrderDatabase: Create pending order
+OrderService -> MessageQueue: Request Credit
+OrderService -> MessageQueue: Request Inventory
+deactivate OrderService
+
+MessageQueue -> CreditService: Request Credit
+activate CreditService
+MessageQueue -> InventoryService: Request Inventory
+activate InventoryService
+CreditService -> CreditDatabase : Does credit exist
+activate CreditDatabase
+return false
+CreditService -> MessageQueue : Credit Request NACK
+deactivate CreditService
+MessageQueue -> OrderService : Credit Request NACK
+activate OrderService
+OrderService -> OrderDatabase: Save CreditState.ABORT
+OrderService -> OrderDatabase: Get Order State
+activate OrderDatabase
+return CreditState.ABORT
+OrderService -> MessageQueue: Abort Credit
+deactivate OrderService
+MessageQueue -> CreditService : Abort Credit
+activate CreditService 
+CreditService -> MessageQueue : Abort Credit ACK
+deactivate CreditService
+MessageQueue -> OrderService : Abort Credit ACK
+activate OrderService
+OrderService -> OrderDatabase : Save CreditState.ABORTED
+deactivate OrderService
+
+
+InventoryService -> InventoryDatabase: Does inventory exist
+activate InventoryDatabase
+return true
+InventoryService -> InventoryDatabase: Acquire Item (lock)
+activate InventoryDatabase 
+return item
+InventoryService -> MessageQueue: Inventory Request ACK
+deactivate InventoryService
+MessageQueue -> OrderService: Inventory Request ACK
+
+activate OrderService
+OrderService -> OrderDatabase: Save InventoryState.REQUESTED
+OrderService -> OrderDatabase: Get Order State
+activate OrderDatabase
+return CreditState.ABORTED
+
+OrderService -> MessageQueue: Abort Inventory
+deactivate OrderService
+MessageQueue -> InventoryService: Abort Inventory
+activate InventoryService
+InventoryService -> InventoryDatabase : Release Item (unlock)
+InventoryService -> MessageQueue: Abort Inventory ACK
+MessageQueue -> OrderService: Abort Inventory ACK
+activate OrderService
+OrderService -> OrderDatabase: Save InventoryState.ABORTED
+@enduml
