@@ -5,16 +5,16 @@ using Microsoft.Extensions.Logging;
 using MongoDB.Bson;
 using OrderService.Models;
 
-namespace OrderService.Services
+namespace OrderService.Services.Handlers
 {
-    public class CommitInventoryNackHandler : CommandHandler<CommitInventoryNack>
+    public class InventoryRequestAckHandler : CommandHandler<InventoryRequestAck>
     {
-        private readonly ILogger<CommitInventoryNackHandler> _logger;
+        private readonly ILogger<InventoryRequestAckHandler> _logger;
         private readonly IOrderRepository _orderRepository;
         private readonly OrderStatusService _orderStatusService;
 
-        public CommitInventoryNackHandler(
-            ILogger<CommitInventoryNackHandler> logger,
+        public InventoryRequestAckHandler(
+            ILogger<InventoryRequestAckHandler> logger,
             IOrderRepository orderRepository,
             OrderStatusService orderStatusService)
         {
@@ -23,24 +23,21 @@ namespace OrderService.Services
             _orderStatusService = orderStatusService;
         }
 
-        public override void Handle(CommitInventoryNack message)
+        public override void Handle(InventoryRequestAck message)
         {
             _logger.LogInformation(message.ToJson());
-            
+
             var order = _orderRepository.GetOrderById(message.TransactionId);
 
-            var nackedItem = order.Inventory.FirstOrDefault(item => item.ItemId == message.ItemId);
+            var inventoryItem = order.Inventory.First(i => i.ItemId == message.ItemId);
 
-            if (nackedItem is null)
+            if (inventoryItem.Status == TransactionStatus.Pending)
             {
-                _logger.LogError("Inventory nack on item that does not exits on order");
-                return;
+                inventoryItem.Status = TransactionStatus.Requested;
             }
-            
-            nackedItem.Status = TransactionStatus.Aborted;
-            
+
             _orderRepository.UpdateOrder(order);
-            
+
             _orderStatusService.OrderUpdated(order.TransactionId);
         }
     }

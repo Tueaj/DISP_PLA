@@ -57,7 +57,7 @@ namespace OrderService.Services
             else if (order.Credit.Status == TransactionStatus.Committed &&
                      order.Inventory.All(item => item.Status == TransactionStatus.Committed))
             {
-                _logger.LogInformation("Ship order...");
+                _logger.LogInformation("Ship order {}...", order.TransactionId);
 
                 _messageProducer.ProduceMessage(new ShipOrder
                 {

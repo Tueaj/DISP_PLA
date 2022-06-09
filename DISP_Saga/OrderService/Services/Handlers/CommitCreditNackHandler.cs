@@ -1,20 +1,19 @@
-﻿using System.Linq;
 using MessageHandling.Abstractions;
 using Messages;
 using Microsoft.Extensions.Logging;
 using MongoDB.Bson;
 using OrderService.Models;
 
-namespace OrderService.Services
+namespace OrderService.Services.Handlers
 {
-    public class InventoryRequestNackHandler : CommandHandler<InventoryRequestNack>
+    public class CommitCreditNackHandler : CommandHandler<CommitCreditNack>
     {
-        private readonly ILogger<InventoryRequestNackHandler> _logger;
+        private readonly ILogger<CommitCreditNackHandler> _logger;
         private readonly IOrderRepository _orderRepository;
         private readonly OrderStatusService _orderStatusService;
 
-        public InventoryRequestNackHandler(
-            ILogger<InventoryRequestNackHandler> logger,
+        public CommitCreditNackHandler(
+            ILogger<CommitCreditNackHandler> logger,
             IOrderRepository orderRepository,
             OrderStatusService orderStatusService)
         {
@@ -23,18 +22,16 @@ namespace OrderService.Services
             _orderStatusService = orderStatusService;
         }
 
-        public override void Handle(InventoryRequestNack message)
+        public override void Handle(CommitCreditNack message)
         {
             _logger.LogInformation(message.ToJson());
-
+            
             var order = _orderRepository.GetOrderById(message.TransactionId);
-
-            var inventoryItem = order.Inventory.First(i => i.ItemId == message.ItemId);
-
-            inventoryItem.Status = TransactionStatus.Aborted;
+            
+            order.Credit.Status = TransactionStatus.Aborted;
             
             _orderRepository.UpdateOrder(order);
-
+            
             _orderStatusService.OrderUpdated(order.TransactionId);
         }
     }

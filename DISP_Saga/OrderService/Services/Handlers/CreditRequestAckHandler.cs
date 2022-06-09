@@ -1,19 +1,19 @@
 ﻿using MessageHandling.Abstractions;
 using Messages;
-using OrderService.Models;
 using Microsoft.Extensions.Logging;
 using MongoDB.Bson;
+using OrderService.Models;
 
-namespace OrderService.Services
+namespace OrderService.Services.Handlers
 {
-    public class CreditRequestNackHandler : CommandHandler<CreditRequestNack>
+    public class CreditRequestAckHandler : CommandHandler<CreditRequestAck>
     {
-        private readonly ILogger<CreditRequestNackHandler> _logger;
+        private readonly ILogger<CreditRequestAckHandler> _logger;
         private readonly IOrderRepository _orderRepository;
         private readonly OrderStatusService _orderStatusService;
 
-        public CreditRequestNackHandler(
-            ILogger<CreditRequestNackHandler> logger,
+        public CreditRequestAckHandler(
+            ILogger<CreditRequestAckHandler> logger,
             IOrderRepository orderRepository,
             OrderStatusService orderStatusService)
         {
@@ -22,14 +22,17 @@ namespace OrderService.Services
             _orderStatusService = orderStatusService;
         }
 
-        public override void Handle(CreditRequestNack message)
+        public override void Handle(CreditRequestAck message)
         {
             _logger.LogInformation(message.ToJson());
 
             var order = _orderRepository.GetOrderById(message.TransactionId);
-            
-            order.Credit.Status = TransactionStatus.Aborted;
-            
+
+            if (order.Credit.Status == TransactionStatus.Pending)
+            {
+                order.Credit.Status = TransactionStatus.Requested;
+            }
+
             _orderRepository.UpdateOrder(order);
 
             _orderStatusService.OrderUpdated(order.TransactionId);

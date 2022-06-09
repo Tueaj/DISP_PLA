@@ -1,20 +1,19 @@
-﻿using System.Linq;
-using MessageHandling.Abstractions;
+﻿using MessageHandling.Abstractions;
 using Messages;
 using Microsoft.Extensions.Logging;
 using MongoDB.Bson;
 using OrderService.Models;
 
-namespace OrderService.Services
+namespace OrderService.Services.Handlers
 {
-    public class CommitInventoryAckHandler : CommandHandler<CommitInventoryAck>
+    public class CommitCreditAckHandler : CommandHandler<CommitCreditAck>
     {
-        private readonly ILogger<CommitInventoryAckHandler> _logger;
+        private readonly ILogger<CommitCreditAckHandler> _logger;
         private readonly IOrderRepository _orderRepository;
         private readonly OrderStatusService _orderStatusService;
 
-        public CommitInventoryAckHandler(
-            ILogger<CommitInventoryAckHandler> logger,
+        public CommitCreditAckHandler(
+            ILogger<CommitCreditAckHandler> logger,
             IOrderRepository orderRepository,
             OrderStatusService orderStatusService)
         {
@@ -23,17 +22,15 @@ namespace OrderService.Services
             _orderStatusService = orderStatusService;
         }
 
-        public override void Handle(CommitInventoryAck message)
+        public override void Handle(CommitCreditAck message)
         {
             _logger.LogInformation(message.ToJson());
 
             var order = _orderRepository.GetOrderById(message.TransactionId);
 
-            var inventoryItem = order.Inventory.First(i => i.ItemId == message.ItemId);
-
-            if (inventoryItem.Status == TransactionStatus.Requested)
+            if (order.Credit.Status == TransactionStatus.Requested)
             {
-                inventoryItem.Status = TransactionStatus.Committed;
+                order.Credit.Status = TransactionStatus.Committed;
             }
 
             _orderRepository.UpdateOrder(order);

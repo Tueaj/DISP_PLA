@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 using MongoDB.Bson;
 using OrderService.Models;
 
-namespace OrderService.Services
+namespace OrderService.Services.Handlers
 {
     public class RollbackInventoryAckHandler : CommandHandler<RollbackInventoryAck>
     {
