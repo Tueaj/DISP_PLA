@@ -5,6 +5,8 @@
 
 *.tgz
 
+Chart.lock
+
 # User-specific files
 *.rsuser
 *.suo

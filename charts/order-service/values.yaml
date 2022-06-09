@@ -8,7 +8,7 @@ fullnameOverride: ""
 
 tlpims-service:
   replicaCount: 1
-  image: credit-service:v1.0
+  image: order-service:v1.0
   environment:
     - name: MessageHandling__HostName
       value: cluster-rabbitmq-cluster
@@ -20,4 +20,4 @@ tlpims-service:
       value: admin
   ingress:
     enabled: true
-    path: /api/credit
+    path: /api/order
