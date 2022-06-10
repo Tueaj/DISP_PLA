@@ -1,0 +1,27 @@
+{{- $fullName := include "mongodb-cluster.fullname" . -}}
+apiVersion: mongodbcommunity.mongodb.com/v1
+kind: MongoDBCommunity
+metadata:
+  name: {{ $fullName }}
+spec:
+  members: {{ .Values.replicaCount }}
+  type: ReplicaSet
+  version: "4.2.6"
+  security:
+    authentication:
+      modes: ["SCRAM"]
+  users:
+    {{- range $user := .Values.users }}
+    - name: {{ $user.name | quote }}
+      db: admin
+      scramCredentialsSecretName: {{ printf "%s-%s-scram" $fullName $user.name }}
+      passwordSecretRef:
+        name: {{ $fullName }}-{{ $user.name }}-password
+      {{- if $user.roles }}
+      {{- with $user.roles }}
+      roles: {{ . | toJson | toString }}
+      {{- end }}
+      {{- end }}
+    {{- end }}
+  additionalMongodConfig:
+    storage.wiredTiger.engineConfig.journalCompressor: zlib

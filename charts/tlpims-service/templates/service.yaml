@@ -1,0 +1,12 @@
+{{- $fullName := include "tlpims-service.fullname" . -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $fullName }}
+spec:
+  ports:
+  - port: {{ .Values.containerPort }}
+    targetPort: {{ .Values.containerPort }}
+    protocol: TCP
+  selector:
+    app: {{ $fullName }}

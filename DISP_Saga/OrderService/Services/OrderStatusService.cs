@@ -33,8 +33,7 @@ namespace OrderService.Services
             _logger.LogInformation("OrderStatusUpdated triggered");
             var order = _repository.GetOrderById(orderStatusUpdatedEventArgs.OrderId);
 
-            if (order.Credit.Status == TransactionStatus.Requested &&
-                order.Inventory.All(item => item.Status == TransactionStatus.Requested))
+            if (IsRequested(order))
             {
                 _logger.LogInformation("Starting commit - Credit with id {}", order.Credit.CreditId);
 
@@ -54,8 +53,7 @@ namespace OrderService.Services
                     }, QueueName.Command);
                 }
             }
-            else if (order.Credit.Status == TransactionStatus.Committed &&
-                     order.Inventory.All(item => item.Status == TransactionStatus.Committed))
+            else if (IsCommitted(order))
             {
                 _logger.LogInformation("Ship order {}...", order.TransactionId);
 
@@ -65,8 +63,7 @@ namespace OrderService.Services
                     ItemsToShip = order.Inventory.ToDictionary(item => item.ItemId, item => item.Amount)
                 }, QueueName.Command);
             }
-            else if (order.Credit.Status == TransactionStatus.Abort ||
-                     order.Inventory.Any(item => item.Status == TransactionStatus.Abort))
+            else if (IsAborted(order))
             {
                 _logger.LogInformation("Aborting order - transaction id {}", order.TransactionId);
 
@@ -85,8 +82,7 @@ namespace OrderService.Services
                     }, QueueName.Command);
                 }
             }
-            else if (order.Credit.Status == TransactionStatus.Rollback ||
-                     order.Inventory.Any(item => item.Status == TransactionStatus.Rollback))
+            else if (IsRollback(order))
             {
                 _logger.LogInformation("Aborting order - transaction id {}", order.TransactionId);
 
@@ -115,8 +111,26 @@ namespace OrderService.Services
                 OrderId = orderId
             });
         }
-    }
+        
+        private bool IsAborted(Order order) =>
+            order.Credit.Status == TransactionStatus.Abort ||
+            order.Credit.Status == TransactionStatus.Aborted ||
+            order.Inventory.Any(item => item.Status == TransactionStatus.Abort) ||
+            order.Inventory.Any(item => item.Status == TransactionStatus.Aborted);
 
+        private bool IsCommitted(Order order) =>
+            order.Credit.Status == TransactionStatus.Committed &&
+            order.Inventory.All(item => item.Status == TransactionStatus.Committed);
+
+        private bool IsRequested(Order order) =>
+            order.Credit.Status == TransactionStatus.Requested &&
+            order.Inventory.All(item => item.Status == TransactionStatus.Requested);
+
+        private bool IsRollback(Order order) =>
+            order.Credit.Status == TransactionStatus.Rollback ||
+            order.Inventory.Any(item => item.Status == TransactionStatus.Rollback);
+    }
+    
     public class OrderStatusUpdatedEventArgs : EventArgs
     {
         public string OrderId;

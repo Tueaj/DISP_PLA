@@ -6,132 +6,146 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 
-namespace InventoryService.Repository;
-
-public class InventoryRepository : IInventoryRepository
+namespace InventoryService.Repository
 {
-    private readonly ILogger<InventoryRepository> _logger;
-    private readonly IMongoCollection<Item> _inventoryCollection;
-    
-    public InventoryRepository(ILogger<InventoryRepository> logger, IOptions<MongoConnectionSettings> settings)
+    public class InventoryRepository : IInventoryRepository
     {
-        _logger = logger;
-        var mongoClient = new MongoClient($"mongodb://{settings.Value.HostName}:{settings.Value.Port}");
-        var mongoDatabase = mongoClient.GetDatabase(settings.Value.DatabaseName);
+        private readonly ILogger<InventoryRepository> _logger;
+        private readonly IMongoCollection<Item> _inventoryCollection;
 
-        _inventoryCollection = mongoDatabase.GetCollection<Item>("Item");
-    }
-
-    public IEnumerable<Item> GetAllItems()
-    {
-        return _inventoryCollection.Find(_ => true).ToList();
-    }
-
-    public Item? GetItemById(string itemId)
-    {
-        return _inventoryCollection.Find(_ => _.ItemId == itemId).FirstOrDefault();
-    }
-    
-    public bool ItemExists(string itemId)
-    {
-        return _inventoryCollection.CountDocuments(_ => _.ItemId == itemId) != 0;
-    }
-
-    public void CreateItem(Item item)
-    {
-        _inventoryCollection.InsertOne(item);
-    }
-
-    public void UpdateItem(Item item, string transactionId)
-    {
-        Item? updated = null;
-        try
+        public InventoryRepository(ILogger<InventoryRepository> logger, IOptions<MongoConnectionSettings> settings)
         {
-            updated = _inventoryCollection.FindOneAndReplace(
-                _ => _.ItemId == item.ItemId && (_.Lock == null || _.Lock.LockedBy == transactionId), item);
-        }
-        catch (MongoException e) when (e is MongoWriteConcernException or MongoWriteException)
-        {
+            _logger = logger;
+            IMongoClient mongoClient;
+
+            if (settings.Value.Credentials == null)
+            {
+                mongoClient = new MongoClient($"mongodb://{settings.Value.HostName}:{settings.Value.Port}");
+            }
+            else
+            {
+                _logger.LogInformation("Using authenticated MongoDB connection");
+                mongoClient =
+                    new MongoClient(
+                        $"mongodb://{settings.Value.Credentials.Username}:{settings.Value.Credentials.Password}@{settings.Value.HostName}:{settings.Value.Port}");
+            }
+
+            var mongoDatabase = mongoClient.GetDatabase(settings.Value.DatabaseName);
+
+            _inventoryCollection = mongoDatabase.GetCollection<Item>("Item");
         }
 
-        if (updated == null)
+        public IEnumerable<Item> GetAllItems()
         {
-            throw new ConstraintException($"Did not hold required lock for Inventory with id {item.ItemId}");
-        }
-    }
-
-    public Item AcquireItem(string itemId, string transactionId)
-    {
-        Item? item = null;
-        try
-        {
-            item = _inventoryCollection.FindOneAndUpdate(
-                _ => _.ItemId == itemId && (_.Lock == null || _.Lock.LockedBy == transactionId),
-                Builders<Item>.Update.Set(_ => _.Lock,
-                    new ItemLock {LockedAt = DateTime.Now, LockedBy = transactionId}));
-        }
-        catch (MongoException e) when (e is MongoWriteConcernException or MongoWriteException)
-        {
-            _logger.LogError(e.Message);
+            return _inventoryCollection.Find(_ => true).ToList();
         }
 
-        if (item == null)
+        public Item? GetItemById(string itemId)
         {
-            throw new ConstraintException($"Could not acquire lock for Inventory with ID {itemId}");
+            return _inventoryCollection.Find(_ => _.ItemId == itemId).FirstOrDefault();
         }
 
-        return item;
-    }
-
-    public void ReleaseItem(string itemId, string transactionId)
-    {
-        Item? item = null;
-        try
+        public bool ItemExists(string itemId)
         {
-            item = _inventoryCollection.FindOneAndUpdate(
-                _ => _.ItemId == itemId && (_.Lock == null || _.Lock.LockedBy == transactionId),
-                Builders<Item>.Update.Set(_ => _.Lock, null));
-        }
-        catch (MongoException e) when (e is MongoWriteConcernException or MongoWriteException)
-        {
+            return _inventoryCollection.CountDocuments(_ => _.ItemId == itemId) != 0;
         }
 
-        if (item == null)
+        public void CreateItem(Item item)
         {
-            throw new ConstraintException($"Could not release lock for Inventory with ID {itemId}");
+            _inventoryCollection.InsertOne(item);
         }
-    }
 
-    public List<Item> AcquireOldLocks(string transactionId)
-    {
-        List<Item> expiredItems = _inventoryCollection
-            .FindSync(_ => _.Lock != null && _.Lock.LockedAt.CompareTo(DateTime.Now.AddMinutes(-1)) >= 0).ToList();
-
-        List<Item> lockedItems = new List<Item>();
-        foreach (var expiredItem in expiredItems)
+        public void UpdateItem(Item item, string transactionId)
         {
-            Item? tryLock = null;
+            Item? updated = null;
             try
             {
-                tryLock = _inventoryCollection.FindOneAndUpdate(
-                    _ => _.ItemId == expiredItem.ItemId && _.Lock != null &&
-                         _.Lock.LockedAt.CompareTo(DateTime.Now.AddMinutes(-1)) >= 0,
-                    Builders<Item>.Update.Set(_ => _.Lock, new ItemLock
-                    {
-                        LockedAt = DateTime.Now,
-                        LockedBy = transactionId
-                    }));
+                updated = _inventoryCollection.FindOneAndReplace(
+                    _ => _.ItemId == item.ItemId && (_.Lock == null || _.Lock.LockedBy == transactionId), item);
             }
             catch (MongoException e) when (e is MongoWriteConcernException or MongoWriteException)
             {
             }
 
-            if (tryLock != null)
+            if (updated == null)
             {
-                lockedItems.Add(tryLock);
+                throw new ConstraintException($"Did not hold required lock for Inventory with id {item.ItemId}");
             }
         }
 
-        return lockedItems;
+        public Item AcquireItem(string itemId, string transactionId)
+        {
+            Item? item = null;
+            try
+            {
+                item = _inventoryCollection.FindOneAndUpdate(
+                    _ => _.ItemId == itemId && (_.Lock == null || _.Lock.LockedBy == transactionId),
+                    Builders<Item>.Update.Set(_ => _.Lock,
+                        new ItemLock {LockedAt = DateTime.Now, LockedBy = transactionId}));
+            }
+            catch (MongoException e) when (e is MongoWriteConcernException or MongoWriteException)
+            {
+                _logger.LogError(e.Message);
+            }
+
+            if (item == null)
+            {
+                throw new ConstraintException($"Could not acquire lock for Inventory with ID {itemId}");
+            }
+
+            return item;
+        }
+
+        public void ReleaseItem(string itemId, string transactionId)
+        {
+            Item? item = null;
+            try
+            {
+                item = _inventoryCollection.FindOneAndUpdate(
+                    _ => _.ItemId == itemId && (_.Lock == null || _.Lock.LockedBy == transactionId),
+                    Builders<Item>.Update.Set(_ => _.Lock, null));
+            }
+            catch (MongoException e) when (e is MongoWriteConcernException or MongoWriteException)
+            {
+            }
+
+            if (item == null)
+            {
+                throw new ConstraintException($"Could not release lock for Inventory with ID {itemId}");
+            }
+        }
+
+        public List<Item> AcquireOldLocks(string transactionId)
+        {
+            List<Item> expiredItems = _inventoryCollection
+                .FindSync(_ => _.Lock != null && _.Lock.LockedAt.CompareTo(DateTime.Now.AddMinutes(-1)) >= 0).ToList();
+
+            List<Item> lockedItems = new List<Item>();
+            foreach (var expiredItem in expiredItems)
+            {
+                Item? tryLock = null;
+                try
+                {
+                    tryLock = _inventoryCollection.FindOneAndUpdate(
+                        _ => _.ItemId == expiredItem.ItemId && _.Lock != null &&
+                             _.Lock.LockedAt.CompareTo(DateTime.Now.AddMinutes(-1)) >= 0,
+                        Builders<Item>.Update.Set(_ => _.Lock, new ItemLock
+                        {
+                            LockedAt = DateTime.Now,
+                            LockedBy = transactionId
+                        }));
+                }
+                catch (MongoException e) when (e is MongoWriteConcernException or MongoWriteException)
+                {
+                }
+
+                if (tryLock != null)
+                {
+                    lockedItems.Add(tryLock);
+                }
+            }
+
+            return lockedItems;
+        }
     }
 }

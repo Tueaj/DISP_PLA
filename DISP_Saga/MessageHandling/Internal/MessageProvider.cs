@@ -50,14 +50,25 @@ namespace MessageHandling.Internal
                     {
                         var body = System.Text.Encoding.Default.GetString(ea.Body.ToArray());
 
-                        messageHandler.HandleDelegate((
-                            JsonConvert.DeserializeObject(body, messageHandler.MessageType, ConfigurationConstants.GetJsonSerializerSettings()) as IMessage)!);
+                        var message = JsonConvert.DeserializeObject(body, messageHandler.MessageType,
+                                ConfigurationConstants.GetJsonSerializerSettings()) as IMessage;
+
+                        if (message == null)
+                        {
+                            _logger.LogError("Failed to handle message with Routing Key: {}, sent on Exchange: {} due to being null",
+                                ea.RoutingKey, ea.Exchange);
+                            channel.BasicNack(ea.DeliveryTag, false, false);
+                            return;
+                        }
+                        
+                        messageHandler.HandleDelegate(message);
 
                         channel.BasicAck(ea.DeliveryTag, false);
                     }
                     catch (Exception e)
                     {
-                        _logger.LogError(e, "Failed to handle message with Routing Key: {}, sent on Exchange: {}", ea.RoutingKey, ea.Exchange);
+                        _logger.LogError(e, "Failed to handle message with Routing Key: {}, sent on Exchange: {}",
+                            ea.RoutingKey, ea.Exchange);
                         channel.BasicNack(ea.DeliveryTag, false, true);
                     }
                 };

@@ -1,0 +1,14 @@
+# Default values for credit-service.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+tlpims-service:
+  replicaCount: 1
+  image: shipment-service:v1.0
+  environment:
+    - name: MessageHandling__HostName
+      value: cluster-rabbitmq-cluster
