@@ -1,0 +1,23 @@
+# Default values for credit-service.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+tlpims-service:
+  replicaCount: 1
+  image: credit-service:v1.0
+  environment:
+    - name: MessageHandling__HostName
+      value: cluster-rabbitmq-cluster
+    - name: MongoConnection__HostName
+      value: mongodb-mongodb-cluster-0.mongodb-mongodb-cluster-svc
+    - name: MongoConnection__Credentials__Username
+      value: admin
+    - name: MongoConnection__Credentials__Password
+      value: admin
+  ingress:
+    enabled: true
+    path: /api/credit

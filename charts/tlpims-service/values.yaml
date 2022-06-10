@@ -1,0 +1,19 @@
+# Default values for tlpims-service.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image: nginx
+
+restartPolicy: Always
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+containerPort: 80
+
+ingress:
+  path: ""
+  enabled: false

@@ -1,0 +1,30 @@
+{{- $fullName := include "tlpims-service.fullname" . -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $fullName }}
+  labels:
+    app: {{ $fullName }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ $fullName }}
+  template:
+    metadata:
+      labels:
+        app: {{ $fullName }}
+    spec:
+      containers:
+      - name: {{ $fullName }}
+        image: {{ .Values.image }}
+        ports:
+        - containerPort: {{ .Values.containerPort }}
+        {{- if .Values.environment }}
+        env:
+        {{- range .Values.environment }}
+        - name: {{ .name }}
+          value: {{ .value }}
+        {{- end }}  
+        {{- end}}
+      restartPolicy: {{ .Values.restartPolicy }}

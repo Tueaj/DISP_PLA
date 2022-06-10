@@ -12,7 +12,18 @@ namespace OrderService.Services
 
         public OrderRepository(IOptions<MongoConnectionSettings> settings)
         {
-            var mongoClient = new MongoClient($"mongodb://{settings.Value.HostName}:{settings.Value.Port}");
+            IMongoClient mongoClient;
+
+            if (settings.Value.Credentials == null)
+            {
+                mongoClient = new MongoClient($"mongodb://{settings.Value.HostName}:{settings.Value.Port}");
+            }
+            else
+            {
+                mongoClient =
+                    new MongoClient(
+                        $"mongodb://{settings.Value.Credentials.Username}:{settings.Value.Credentials.Password}@{settings.Value.HostName}:{settings.Value.Port}");
+            }
             var mongoDatabase = mongoClient.GetDatabase(settings.Value.DatabaseName);
 
             _orderCollection = mongoDatabase.GetCollection<Order>("Order");
