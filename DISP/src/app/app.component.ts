@@ -5,7 +5,7 @@ import { map, Subject } from 'rxjs';
 
 export interface Order {
   items: Map<string, number>,
-  orderId: string,
+  creditId: string,
   price: number
 }
 
@@ -31,7 +31,7 @@ export class AppComponent{
   dataSource$ : Subject<Map<string, number>> = new Subject();
   tempData: Order = {
     items: new Map(),
-    orderId: '',
+    creditId: '',
     price: 0
   }; 
 
@@ -55,14 +55,14 @@ export class AppComponent{
 
   public async sendOrder(): Promise<void>{
     const httpRequest  = {
-      creditId: this.tempData.orderId,
+      creditId: this.tempData.creditId,
       orderedItems: Object.fromEntries(this.tempData.items),
       creditRequired: this.tempData.price
     }
 
     await this.httpClient.post('/api/order', httpRequest).toPromise();
 
-    this.tempData.orderId = '';
+    this.tempData.creditId = '';
     this.tempData.price = 0;
     this.tempData.items.clear();
     this.dataSource$.next(new Map());
