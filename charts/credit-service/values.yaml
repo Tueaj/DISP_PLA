@@ -20,4 +20,9 @@ tlpims-service:
       value: admin
   ingress:
     enabled: true
-    path: /api/credit
+    rules:
+    - path: /credit/swagger
+      pathRewrite: /swagger
+      name: swagger
+    - path: /api/credit
+      name: api
