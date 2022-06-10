@@ -1,16 +1,23 @@
-import {Component, Inject, OnInit} from '@angular/core';
-import {MatDialog, MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
-import { BehaviorSubject, map, Observable, Subject } from 'rxjs';
-
-export interface PeriodicElement {
-  item: string;
-  amount: number;
-}
+import { HttpClient } from '@angular/common/http';
+import { Component, Inject } from '@angular/core';
+import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { map, Subject } from 'rxjs';
 
 export interface Order {
-  items: PeriodicElement[],
+  items: Map<string, number>,
   orderId: string,
   price: number
+}
+
+export interface HttpCreateOrderRequest{
+  creditId: string,
+  orderedItems: Map<string, number>,
+  creditRequired: number
+}
+
+export interface DialogData{
+  item: string,
+  amount: number
 }
 
 
@@ -21,11 +28,16 @@ export interface Order {
 })
 export class AppComponent{
   displayedColumns: string[] = ['item', 'amount'];
-  dataSource$ : Subject<PeriodicElement[]> = new Subject();
-  tempData: Order; 
+  dataSource$ : Subject<Map<string, number>> = new Subject();
+  tempData: Order = {
+    items: new Map(),
+    orderId: '',
+    price: 0
+  }; 
 
-  constructor(public dialog: MatDialog) {
-    this.tempData = {} as Order;
+  dataSourceObservable = this.dataSource$.pipe(map(emit => Array.from(emit.entries())))
+
+  constructor(public dialog: MatDialog, private httpClient: HttpClient) {
   }
 
   public addItemDialog(): void{
@@ -36,13 +48,24 @@ export class AppComponent{
 
     dialogRef.afterClosed().subscribe(result => {
       console.log('The dialog was closed');
-      this.tempData.items.push(result);
+      this.tempData.items.set(result.item, result.amount);
       this.dataSource$.next(this.tempData.items);
     });
   }
 
-  public sendOrder(): void{
-    console.log(this.tempData);
+  public async sendOrder(): Promise<void>{
+    const httpRequest  = {
+      creditId: this.tempData.orderId,
+      orderedItems: Object.fromEntries(this.tempData.items),
+      creditRequired: this.tempData.price
+    }
+
+    await this.httpClient.post('/api/order', httpRequest).toPromise();
+
+    this.tempData.orderId = '';
+    this.tempData.price = 0;
+    this.tempData.items.clear();
+    this.dataSource$.next(new Map());
   }
 
 }
@@ -54,7 +77,7 @@ export class AppComponent{
 export class DialogOverviewExampleDialog {
   constructor(
     public dialogRef: MatDialogRef<DialogOverviewExampleDialog>,
-    @Inject(MAT_DIALOG_DATA) public data: PeriodicElement,
+    @Inject(MAT_DIALOG_DATA) public data: DialogData,
   ) {}
 
   onNoClick(): void {
