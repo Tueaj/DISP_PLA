@@ -20,4 +20,9 @@ tlpims-service:
       value: admin
   ingress:
     enabled: true
-    path: /api/order
+    rules:
+    - path: /order/swagger
+      pathRewrite: /swagger
+      name: swagger
+    - path: /api/order
+      name: api
