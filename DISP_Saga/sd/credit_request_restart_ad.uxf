@@ -110,10 +110,11 @@ yes</panel_attributes>
     <coordinates>
       <x>376</x>
       <y>88</y>
-      <w>96</w>
+      <w>128</w>
       <h>152</h>
     </coordinates>
-    <panel_attributes>lt=&lt;-</panel_attributes>
+    <panel_attributes>lt=&lt;-
+throws</panel_attributes>
     <additional_attributes>100.0;10.0;100.0;170.0;10.0;170.0</additional_attributes>
   </element>
   <element>
@@ -133,23 +134,24 @@ Credit request</panel_attributes>
     <coordinates>
       <x>328</x>
       <y>232</y>
-      <w>24</w>
+      <w>48</w>
       <h>64</h>
     </coordinates>
-    <panel_attributes>lt=&lt;-</panel_attributes>
+    <panel_attributes>lt=&lt;-
+credit</panel_attributes>
     <additional_attributes>10.0;60.0;10.0;10.0</additional_attributes>
   </element>
   <element>
     <id>UMLState</id>
     <coordinates>
-      <x>296</x>
+      <x>288</x>
       <y>280</y>
-      <w>88</w>
+      <w>96</w>
       <h>40</h>
     </coordinates>
     <panel_attributes>Does changelog
-for transaction
-exist?</panel_attributes>
+entry for 
+transaction exist?</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
