@@ -37,9 +37,13 @@ namespace CreditService.Services
 
                 var creditChangeLog = credit.ChangeLog.Find(change =>
                     change.TransactionId == message.TransactionId);
-                creditChangeLog.Status = CreditChangeStatus.Aborted;
-                _creditRepository.UpdateCredit(credit, message.TransactionId);
                 
+                if (creditChangeLog != default)
+                {
+                    creditChangeLog.Status = CreditChangeStatus.Aborted;
+                    _creditRepository.UpdateCredit(credit, message.TransactionId);
+                }
+
 
                 _creditRepository.ReleaseCredit(credit.CreditId, message.TransactionId);
             }
