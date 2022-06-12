@@ -112,23 +112,25 @@ namespace OrderService.Services
             });
         }
         
+        private bool IsRequested(Order order) =>
+            order.Credit.Status == TransactionStatus.Requested &&
+            order.Inventory.All(item => item.Status == TransactionStatus.Requested);
+        
+        private bool IsCommitted(Order order) =>
+            order.Credit.Status == TransactionStatus.Committed &&
+            order.Inventory.All(item => item.Status == TransactionStatus.Committed);
+
         private bool IsAborted(Order order) =>
             order.Credit.Status == TransactionStatus.Abort ||
             order.Credit.Status == TransactionStatus.Aborted ||
             order.Inventory.Any(item => item.Status == TransactionStatus.Abort) ||
             order.Inventory.Any(item => item.Status == TransactionStatus.Aborted);
 
-        private bool IsCommitted(Order order) =>
-            order.Credit.Status == TransactionStatus.Committed &&
-            order.Inventory.All(item => item.Status == TransactionStatus.Committed);
-
-        private bool IsRequested(Order order) =>
-            order.Credit.Status == TransactionStatus.Requested &&
-            order.Inventory.All(item => item.Status == TransactionStatus.Requested);
-
         private bool IsRollback(Order order) =>
             order.Credit.Status == TransactionStatus.Rollback ||
-            order.Inventory.Any(item => item.Status == TransactionStatus.Rollback);
+            order.Credit.Status == TransactionStatus.Rolledback ||
+            order.Inventory.Any(item => item.Status == TransactionStatus.Rollback) ||
+            order.Inventory.Any(item => item.Status == TransactionStatus.Rolledback);
     }
     
     public class OrderStatusUpdatedEventArgs : EventArgs
