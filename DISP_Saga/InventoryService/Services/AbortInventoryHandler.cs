@@ -35,10 +35,13 @@ namespace InventoryService.Services
                 // and try again.
                 Item item = _inventoryRepository.AcquireItem(message.ItemId, message.TransactionId);
 
-                var change = item.ChangeLog.First(log => log.TransactionId == message.TransactionId);
-                change.Status = ItemChangeStatus.Aborted;
-                _inventoryRepository.UpdateItem(item, message.TransactionId);
-
+                var change = item.ChangeLog.FirstOrDefault(log => log.TransactionId == message.TransactionId);
+                if (change != default)
+                {
+                    change.Status = ItemChangeStatus.Aborted;
+                    _inventoryRepository.UpdateItem(item, message.TransactionId);
+                }
+                
                 _inventoryRepository.ReleaseItem(item.ItemId, message.TransactionId);
             }
             _producer.ProduceMessage(

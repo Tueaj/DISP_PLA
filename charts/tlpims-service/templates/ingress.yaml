@@ -13,7 +13,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-  - host: kubernetes.local
+  - host: localhost
     http:
       paths:
       - path: {{ .path }}{{ if .pathRewrite }}(/|$)(.*){{ end }}

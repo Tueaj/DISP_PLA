@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using CreditService.Models;
+using CreditService.Services;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 
@@ -28,6 +29,9 @@ namespace CreditService.Repository
             var mongoDatabase = mongoClient.GetDatabase(settings.Value.DatabaseName);
 
             _creditCollection = mongoDatabase.GetCollection<Credit>("Credit");
+
+            var dummyDataService = new DummyDataService(this);
+            dummyDataService.CreateDummyData();
         }
 
         public IEnumerable<Credit> GetAllCredits()

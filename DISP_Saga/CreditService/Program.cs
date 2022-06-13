@@ -36,7 +36,6 @@ builder.Services.AddControllers()
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSingleton<ICreditRepository, CreditRepository>();
-
 builder.Services.AddHostedService<TimeoutDetectorService>();
 
 
