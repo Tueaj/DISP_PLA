@@ -1,0 +1,31 @@
+@startuml
+
+actor "User" as user
+
+database "Database" as db
+
+
+component [Application] {
+    component [Order API]
+
+    user -> [Order API] : create order
+
+
+    component [Inventory Repository]
+    component [Credit Repository]
+    component [Shipment Service]
+
+    [Inventory Repository] -[hidden]-> [Credit Repository]
+    [Credit Repository] -[hidden]-> [Shipment Service]
+
+    [Order API] -up-> [Inventory Repository] : substract inventory
+    [Order API] -> [Credit Repository] : substract credit
+    [Order API] -down-> [Shipment Service] : ship order
+
+    [Inventory Repository] -> db : update substracted inventory
+    [Credit Repository] -> db : update substracted credit
+}
+
+
+
+@enduml
