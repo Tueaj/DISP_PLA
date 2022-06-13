@@ -18,7 +18,7 @@ public class DummyDataService
     public void CreateDummyData()
     {
         var credits = _creditRepository.GetAllCredits().ToList();
-        if (credits.Count is 0)
+        if (credits.Count is not 0)
         {
             return;
         }

@@ -18,7 +18,7 @@ public class DummyDataService
     public void CreateDummyData()
     {
         var items = _inventoryRepository.GetAllItems().ToList();
-        if (items.Count is 0)
+        if (items.Count is not 0)
         {
             return;
         }

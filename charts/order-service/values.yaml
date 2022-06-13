@@ -11,9 +11,9 @@ tlpims-service:
   image: order-service:v1.0
   environment:
     - name: MessageHandling__HostName
-      value: cluster-rabbitmq-cluster
+      value: rabbitmq-cluster
     - name: MongoConnection__HostName
-      value: mongodb-mongodb-cluster-0.mongodb-mongodb-cluster-svc
+      value: mongodb-cluster-0.mongodb-cluster-svc
     - name: MongoConnection__Credentials__Username
       value: admin
     - name: MongoConnection__Credentials__Password

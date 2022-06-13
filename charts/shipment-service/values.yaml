@@ -11,4 +11,4 @@ tlpims-service:
   image: shipment-service:v1.0
   environment:
     - name: MessageHandling__HostName
-      value: cluster-rabbitmq-cluster
+      value: rabbitmq-cluster
