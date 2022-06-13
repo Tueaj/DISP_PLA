@@ -14,12 +14,15 @@ namespace OrderService.Controllers
     public class OrderController : ControllerBase
     {
         private readonly IOrderRepository _orderRepository;
-        private readonly IMessageProducer _messageProducer;
+        private readonly OrderStatusService _orderStatusService;
 
-        public OrderController(IOrderRepository orderRepository, IMessageProducer messageProducer)
+        public OrderController(
+            IOrderRepository orderRepository,
+            OrderStatusService orderStatusService)
         {
             _orderRepository = orderRepository;
-            _messageProducer = messageProducer;
+            _orderStatusService = orderStatusService;
+            ReplayPendingEvent();
         }
 
         [HttpGet]
@@ -47,24 +50,20 @@ namespace OrderService.Controllers
 
             _orderRepository.CreateOrder(order);
 
-            _messageProducer.ProduceMessage(new CreditRequest
-            {
-                TransactionId = order.TransactionId,
-                CreditId = order.Credit.CreditId,
-                Amount = order.Credit.Amount
-            }, QueueName.Command);
-
-            foreach (var inventoryState in order.Inventory)
-            {
-                _messageProducer.ProduceMessage(new InventoryRequest
-                {
-                    TransactionId = order.TransactionId,
-                    ItemId = inventoryState.ItemId,
-                    Amount = inventoryState.Amount,
-                }, QueueName.Command);
-            }
+           _orderStatusService.OrderUpdated(order.TransactionId);
 
             return Created("Order creation begun", createOrderRequest);
+        }
+
+        private void ReplayPendingEvent()
+        {
+            var nonCompletedOrders = _orderRepository.GetAllOrders().ToList()
+                .FindAll(order => order.Status == OrderStatus.PENDING);
+
+            foreach (var order in nonCompletedOrders)
+            {
+                _orderStatusService.OrderUpdated(order.TransactionId);
+            }
         }
     }
 }
