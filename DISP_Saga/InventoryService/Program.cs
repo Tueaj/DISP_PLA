@@ -36,6 +36,7 @@ builder.Services.AddControllers()
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSingleton<IInventoryRepository, InventoryRepository>();
+builder.Services.AddSingleton<DummyDataService>();
 
 builder.Services.AddHostedService<TimeoutDetectorService>();
 
