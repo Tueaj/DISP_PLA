@@ -8,9 +8,16 @@ namespace InventoryService.Services;
 
 public class DummyDataService
 {
+    private readonly IInventoryRepository _inventoryRepository;
+
     public DummyDataService(IInventoryRepository inventoryRepository)
     {
-        var items = inventoryRepository.GetAllItems().ToList();
+        _inventoryRepository = inventoryRepository;
+    }
+
+    public void CreateDummyData()
+    {
+        var items = _inventoryRepository.GetAllItems().ToList();
         if (items.Count is 0)
         {
             return;
@@ -20,7 +27,7 @@ public class DummyDataService
         
         for (int i = 0; i < 100; i++)
         {
-            inventoryRepository.CreateItem(new Item
+            _inventoryRepository.CreateItem(new Item
             {
                 Amount = rnd.Next(10,100),
                 ChangeLog = new List<ItemChange>(),

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using InventoryService.Models;
+using InventoryService.Services;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
@@ -33,6 +34,9 @@ namespace InventoryService.Repository
             var mongoDatabase = mongoClient.GetDatabase(settings.Value.DatabaseName);
 
             _inventoryCollection = mongoDatabase.GetCollection<Item>("Item");
+            
+            var dummyDataService = new DummyDataService(this);
+            dummyDataService.CreateDummyData();
         }
 
         public IEnumerable<Item> GetAllItems()
