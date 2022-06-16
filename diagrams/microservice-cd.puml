@@ -1,0 +1,49 @@
+@startuml
+
+actor "User" as user
+
+cloud Application {
+    component "Order Service" {
+        component [Order API]
+        component [Order Repository]
+        [Order API] -> [Order Repository] : create order
+    }
+
+    database "Order Database" as orderdb
+
+    [Order Repository] -> orderdb : persist orders
+
+    component "Inventory Service" {
+        component [Inventory API]
+        component [Inventory Repository]
+
+        [Inventory API] -> [Inventory Repository] : substract from inventory
+    }
+
+    [Order API] --> [Inventory API] : substract from inventory
+
+    database "Inventory Database" as inventorydb
+
+    [Inventory Repository] --> inventorydb : persist inventory changes
+
+    component "Credit Service" {
+        component [Credit API]
+        component [Credit Repository]
+
+        [Credit API] -> [Credit Repository] : substract from credit
+    }
+
+    [Order API] -up-> [Credit API] : substract from credit
+
+    database "Credit Database" as creditdb
+
+    [Credit Repository] -up-> creditdb : persist credit changes
+
+}
+
+user -[hidden]> [Credit API]
+user -[hidden]-> [Inventory API]
+user --> [Order API] : create order
+
+
+@enduml
