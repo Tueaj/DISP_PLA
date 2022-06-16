@@ -1,0 +1,12 @@
+@startuml
+
+class Frontend
+
+node "Backend" {
+  Frontend -> OrderService
+  OrderService <-d-> CreditService
+  OrderService <-d-> InventoryService
+  OrderService <-d-> ShipmentService
+}
+
+@enduml

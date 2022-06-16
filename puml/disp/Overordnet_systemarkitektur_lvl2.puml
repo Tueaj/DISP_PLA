@@ -1,0 +1,17 @@
+@startuml
+
+class Frontend
+
+node "Backend" {
+  Frontend -> OrderService
+  OrderService <-u-> RabbitMQ
+  CreditService <-u-> RabbitMQ
+  InventoryService <-u-> RabbitMQ
+  ShipmentService <-u-> RabbitMQ
+  OrderService <-d-> MongoDB
+  CreditService <-d-> MongoDB
+  InventoryService <-d-> MongoDB
+  ShipmentService <-d-> MongoDB
+}
+
+@enduml
